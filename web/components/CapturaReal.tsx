@@ -4,7 +4,7 @@ import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
 import {
   cajas as apiCajas, crearCaja, crearLote, emparejar, ErrorApi, lote as apiLote, lotes as apiLotes,
-  svgComoImagen, urlEtiqueta, urlHoja, urlMiniatura, type Caja, type Lote,
+  svgComoImagen, urlEtiqueta, urlHoja, urlMiniatura, urlPdfLote, yo, type Caja, type Lote,
 } from "@/lib/api";
 
 const estadoLote: Record<string, [string, string]> = {
@@ -18,6 +18,9 @@ const hora = (iso: string) => new Date(iso).toLocaleTimeString("es-PE", { hour: 
 
 export default function CapturaReal() {
   const [lista, setLista] = useState<Lote[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+  useEffect(() => { yo().then((u) => setRoles(u.roles)).catch(() => {}); }, []);
+  const puedePdf = roles.some((r) => r === "admin" || r === "archivero");
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [sel, setSel] = useState<Lote | null>(null);
   const [modal, setModal] = useState<"lote" | "caja" | null>(null);
@@ -103,6 +106,7 @@ export default function CapturaReal() {
               <div className="acciones" style={{ marginBottom: 12 }}>
                 <a className="btn btn-sec btn-chico" href={urlHoja(sel.code)} target="_blank" rel="noopener"><Icono n="doc" />Hoja de lote</a>
                 {sel.estado !== "cerrado" && <button className="btn btn-sec btn-chico" onClick={() => nuevoQr(sel)}><Icono n="celular" />Emparejar celular</button>}
+                {puedePdf && sel.paginas?.some((p) => p.ocr === "ok") && <a className="btn btn-sec btn-chico" href={urlPdfLote(sel.code)} target="_blank" rel="noopener"><Icono n="descargar" />PDF buscable</a>}
               </div>
               {!sel.paginas?.length ? <p className="gris" style={{ fontSize: ".86rem" }}>Esperando la primera página…</p> : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10 }}>
@@ -110,7 +114,7 @@ export default function CapturaReal() {
                     <figure key={p.id} style={{ margin: 0, display: "grid", gap: 5 }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={urlMiniatura(p.id)} alt={`Página ${p.indice}`} loading="lazy" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", borderRadius: 6, background: "#ECEBDF", outline: p.estado === "reescanear" ? "2px solid var(--falta)" : undefined }} onError={(e) => { (e.target as HTMLImageElement).style.visibility = "hidden"; }} />
-                      <figcaption style={{ fontSize: ".74rem" }}><b className="maq">pág. {p.indice}</b> <span className={`chip ${estadoPagina[p.estado]?.[1] ?? "neutro"}`}>{estadoPagina[p.estado]?.[0] ?? p.estado}</span>{p.motivo ? <span className="gris2" style={{ display: "block" }}>{p.motivo}</span> : null}</figcaption>
+                      <figcaption style={{ fontSize: ".74rem" }}><b className="maq">pág. {p.indice}</b> <span className={`chip ${estadoPagina[p.estado]?.[1] ?? "neutro"}`}>{estadoPagina[p.estado]?.[0] ?? p.estado}</span>{p.motivo ? <span className="gris2" style={{ display: "block" }}>{p.motivo}</span> : null}{p.ocr === "ok" ? <span className="gris2" style={{ display: "block" }}>Texto leído{p.idioma ? ` · ${p.idioma}` : ""}</span> : p.ocr === "error" ? <span style={{ display: "block", color: "var(--falta)" }}>No se pudo leer</span> : null}</figcaption>
                     </figure>
                   ))}
                 </div>

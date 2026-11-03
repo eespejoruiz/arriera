@@ -32,7 +32,7 @@ export const salir = () => api<void>("/auth/logout", { method: "POST" });
 
 // ---------- Inventario y captura ----------
 export type Caja = { code: string; shelf_location: string | null; anios: string; series_hint: string | null; paper_condition: string; estimated_pages: number | null; captured_pages: number; status: string };
-export type PaginaLote = { id: string; indice: number; estado: string; motivo: string | null; inclinacion: number | null };
+export type PaginaLote = { id: string; indice: number; estado: string; motivo: string | null; inclinacion: number | null; ocr?: string; idioma?: string | null };
 export type Lote = { code: string; caja: string; origen: string; estado: string; recibidas: number; esperadas: number | null; creado: string; rechazos: number; paginas?: PaginaLote[] | null };
 export const cajas = () => api<Caja[]>("/cajas");
 export const crearCaja = (c: Partial<Caja> & { code: string; year_from?: number; year_to?: number }) => api<Caja>("/cajas", { method: "POST", body: JSON.stringify(c) });
@@ -43,6 +43,21 @@ export const emparejar = (code: string) => api<{ url: string; qr_svg: string; ve
 export const urlHoja = (code: string) => `${API_URL}/captura/lotes/${code}/hoja.pdf`;
 export const urlEtiqueta = (code: string) => `${API_URL}/cajas/${code}/etiqueta.pdf`;
 export const urlMiniatura = (id: string) => `${API_URL}/captura/paginas/${id}/miniatura`;
+export const urlPdfLote = (code: string) => `${API_URL}/captura/lotes/${code}/buscable.pdf`;
+
+// Búsqueda (Sprint 2)
+export type ResultadoBusqueda = { pagina_id: string; lote: string; caja: string; indice: number; idioma: string | null; confianza: number | null; fragmento: string | null; rango: number };
+export type Faceta = { valor: string; n: number };
+export type Busqueda = { consulta: string; total: number; pagina: number; resultados: ResultadoBusqueda[]; facetas: { cajas: Faceta[]; idiomas: Faceta[] }; marcas: [string, string] };
+export type Caja01 = { x0: number; y0: number; x1: number; y1: number };
+export type PaginaVista = { pagina_id: string; lote: string; caja: string; indice: number; total_paginas: number; ancho: number | null; alto: number | null; idioma: string | null; confianza: number | null; manuscrito: number | null; ocr: string; texto: string; resaltes: Caja01[] };
+export type ResumenProceso = { proveedor_activo: string; paginas_por_estado: Record<string, number>; errores: number; proveedores: { proveedor: string; paginas: number; costo_usd: number; usd_por_mil: number; segundos_por_pagina: number }[] };
+export const buscar = (p: Record<string, string>) => api<Busqueda>(`/busqueda?${new URLSearchParams(p)}`);
+export const verPagina = (id: string, q: string) => api<PaginaVista>(`/busqueda/paginas/${id}?${new URLSearchParams({ q })}`);
+export const urlImagenPagina = (id: string) => `${API_URL}/busqueda/paginas/${id}/imagen`;
+export const urlMiniaturaBusqueda = (id: string) => `${API_URL}/busqueda/paginas/${id}/miniatura`;
+export const resumenProceso = () => api<ResumenProceso>("/procesamiento/resumen");
+export const reprocesarOcr = (code: string) => api<{ en_cola: number }>(`/procesamiento/lotes/${code}/ocr`, { method: "POST" });
 export const svgComoImagen = (svg: string) => `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 
 // ---------- Dispositivo (celular) ----------
