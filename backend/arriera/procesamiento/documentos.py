@@ -245,6 +245,81 @@ def extraer(db: Session, llm: ProveedorLLM, tipo: TipoDocumental, pags: list[Pag
     return d.get("campos") or {}
 
 
+# ------------------------------------------------------------------ decisión por campo
+CORROBORABLES = {"dni", "date", "money_pen", "integer", "string"}
+OCR_FIABLE = 0.9
+
+
+def evaluar_campo(c: dict, ia: dict, n_paginas: int, palabras_de) -> dict:
+    """Normaliza, valida y decide si el campo se autoacepta. La confianza combina la de la IA con la evidencia
+    del OCR: si el valor aparece literalmente en la página, una sola vez y leído con confianza alta, queda
+    corroborado (la IA suele no pasar de 0.95 aunque el dato esté impreso con claridad)."""
+    original = ia.get("valor_original")
+    norm, nota = normalizar_valor(c["type"], ia.get("valor") or original, c.get("options"))
+    conf = float(ia.get("confianza") or 0)
+    if nota:
+        conf = min(conf, 0.5)
+    pag_no = ia.get("pagina") if isinstance(ia.get("pagina"), int) and 1 <= ia["pagina"] <= n_paginas else None
+    bbox = None
+    corroborado = False
+    if norm is not None:
+        palabras = palabras_de(pag_no or 1)
+        bbox = ubicar(palabras, original) or ubicar(palabras, norm)
+        if bbox and pag_no is None:
+            pag_no = 1
+        lit = ubicar(palabras, original) if original else None
+        if (
+            not nota
+            and lit
+            and c["type"] in CORROBORABLES
+            and (lit.get("conf") or 0) >= OCR_FIABLE
+            and _veces(palabras, original) == 1
+        ):
+            corroborado = True
+            conf = min(0.99, 1 - (1 - conf) * (1 - lit["conf"]))  # dos evidencias independientes
+    if norm is None:
+        estado = "pendiente" if c["required"] else "vacio"
+        motivo = f"No se encontró «{c['nombre']}»" if c["required"] else None
+    elif nota:
+        estado, motivo = "pendiente", nota
+    elif c["auto_accept"] > 1:
+        estado, motivo = "pendiente", "Dato sensible: siempre lo revisa una persona"
+    elif conf >= c["auto_accept"]:
+        estado, motivo = "auto_aceptado", None
+    else:
+        estado, motivo = "pendiente", f"Confianza {round(conf * 100)}% (umbral {round(c['auto_accept'] * 100)}%)"
+    return {
+        "original": original,
+        "norm": norm,
+        "nota": nota,
+        "conf": conf,
+        "pagina": pag_no,
+        "bbox": bbox,
+        "estado": estado,
+        "motivo": motivo,
+        "corroborado": corroborado,
+    }
+
+
+def _veces(palabras: list[dict], valor: str) -> int:
+    """Cuántas veces aparece el valor en la página (para no corroborar un DNI que figura dos veces)."""
+    from arriera.procesamiento.normalizar import ubicar as _u
+
+    n, resto = 0, list(palabras)
+    while resto and n < 3:
+        b = _u(resto, valor)
+        if not b:
+            break
+        n += 1
+        # quita las palabras usadas y sigue buscando
+        resto = [
+            p
+            for p in resto
+            if not (p["x0"] >= b["x0"] and p["x1"] <= b["x1"] and p["y0"] >= b["y0"] and p["y1"] <= b["y1"])
+        ]
+    return n
+
+
 # ------------------------------------------------------------------ armado del documento
 def _crear_documento(
     db: Session,
@@ -272,33 +347,9 @@ def _crear_documento(
     confs, valores = [], {}
     for c in tipo.fields_schema.get("fields", []):
         ia = campos_ia.get(c["key"]) or {}
-        original = ia.get("valor_original")
-        norm, nota = normalizar_valor(c["type"], ia.get("valor") or original, c.get("options"))
-        conf = float(ia.get("confianza") or 0)
-        if nota:
-            conf = min(conf, 0.5)
-        pag_no = ia.get("pagina") if isinstance(ia.get("pagina"), int) and 1 <= ia["pagina"] <= len(pags) else None
-        bbox = None
-        if norm is not None:
-            pagina_ref = pags[(pag_no or 1) - 1]
-            palabras = (leer_resultado(pagina_ref) or {}).get("palabras", [])
-            bbox = ubicar(palabras, original) or ubicar(palabras, norm)
-            if bbox and pag_no is None:
-                pag_no = 1
-        if norm is None:
-            estado = "pendiente" if c["required"] else "vacio"
-            motivo = f"No se encontró «{c['nombre']}»" if c["required"] else None
-        elif nota:
-            estado, motivo = "pendiente", nota
-        elif c["auto_accept"] > 1:
-            estado, motivo = "pendiente", "Dato sensible: siempre lo revisa una persona"
-        elif conf >= c["auto_accept"]:
-            estado, motivo = "auto_aceptado", None
-        else:
-            estado, motivo = (
-                "pendiente",
-                f"Confianza {round(conf * 100)}% (umbral {round(c['auto_accept'] * 100)}%)",
-            )
+        r = evaluar_campo(c, ia, len(pags), lambda n: (leer_resultado(pags[n - 1]) or {}).get("palabras", []))
+        original, norm, nota, conf = r["original"], r["norm"], r["nota"], r["conf"]
+        pag_no, bbox, estado, motivo = r["pagina"], r["bbox"], r["estado"], r["motivo"]
         ex = Extraccion(
             document_id=doc.id,
             field_key=c["key"],

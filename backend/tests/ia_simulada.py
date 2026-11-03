@@ -57,7 +57,9 @@ def responder(herramienta: str, texto: str) -> dict:
                     "codigo_asociado": _campo(None, None, 0.0, None),
                     "fecha_solicitud": _campo("14 de marzo de 2018", "2018-03-14", 0.95),
                     "tipo_subsidio": _campo("enfermedad", "enfermedad", 0.96),
-                    "monto_solicitado": _campo("S/ 1,250.00", "1250.00", 0.80),
+                    "monto_solicitado": _campo(
+                        "mil doscientos cincuenta soles", "1250.00", 0.80
+                    ),  # no está literal: no se corrobora
                     "numero_expediente": _campo("2018-0412", "2018-0412", 0.97),
                 }
             }

@@ -94,11 +94,13 @@ def ubicar(palabras: list[dict], valor: str | None) -> dict | None:
             acum += norm[j]
             if acum.startswith(meta) or acum == meta:
                 cajas = [palabras[k] for k in range(i, j + 1) if norm[k]]
+                confs = [c["conf"] for c in cajas if c.get("conf") is not None]
                 return {
                     "x0": min(c["x0"] for c in cajas),
                     "y0": min(c["y0"] for c in cajas),
                     "x1": max(c["x1"] for c in cajas),
                     "y1": max(c["y1"] for c in cajas),
+                    "conf": min(confs) if confs else None,
                 }
             if not meta.startswith(acum):
                 break

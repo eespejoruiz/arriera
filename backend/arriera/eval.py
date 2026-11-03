@@ -22,7 +22,6 @@ from arriera.db import SessionLocal
 from arriera.models import TipoDocumental
 from arriera.procesamiento import documentos as proc
 from arriera.procesamiento import prompts
-from arriera.procesamiento.normalizar import normalizar_valor
 from arriera.providers.llm import proveedor_llm
 from arriera.providers.ocr import OCRTesseract
 
@@ -44,6 +43,7 @@ class DocVerdad:
 class PaginaEval:  # lo mínimo que usan separar, clasificar y extraer
     page_index: int
     ocr_text: str
+    palabras: list = field(default_factory=list)
 
 
 def _fecha(r: random.Random) -> tuple[date, str]:
@@ -76,10 +76,12 @@ def generar(r: random.Random) -> DocVerdad:
     if tipo == "informe_medico":
         d = r.randint(2, 15)
         medico = f"{r.choice(NOMBRES)} {r.choice(APELLIDOS)}"
+        cmp = str(r.randint(10000, 99999))
         return DocVerdad(tipo, [["INFORME MÉDICO", "Clínica Los Andes (ficticia)", f"Paciente: {nombre}",
                                  f"Fecha: {ft}", "Diagnóstico: lumbalgia mecánica",
-                                 f"Se indica descanso médico por {d} días", f"Dr(a). {medico} · CMP {r.randint(10000, 99999)}"]],
-                         {"nombre_paciente": nombre, "fecha_informe": f.isoformat(), "dias_descanso": str(d)})  # fmt: skip
+                                 f"Se indica descanso médico por {d} días", f"Dr(a). {medico} · CMP {cmp}"]],
+                         {"nombre_paciente": nombre, "fecha_informe": f.isoformat(), "dias_descanso": str(d),
+                          "medico": medico, "cmp": cmp, "diagnostico": "Lumbalgia mecánica"})  # fmt: skip
     if tipo == "boleta_pago":
         neto, nt = _monto(r, 100, 600)
         return DocVerdad(tipo, [["BOLETA DE PAGO", "Empleador: Hospital Regional (ficticio)",
@@ -134,7 +136,8 @@ def evaluar(n_docs: int, semilla: int) -> dict:
             idx = len(paginas) + 1
             if k == 0:
                 inicios_verdad.add(idx)
-            paginas.append(PaginaEval(idx, ocr.analizar(dibujar(lineas)).texto))
+            res_ocr = ocr.analizar(dibujar(lineas))
+            paginas.append(PaginaEval(idx, res_ocr.texto, [p.__dict__ for p in res_ocr.palabras]))
     with SessionLocal() as db:
         tipos = db.scalars(select(TipoDocumental).where(TipoDocumental.is_active.is_(True))).all()
         defs = {t.key: {c["key"]: c for c in t.fields_schema.get("fields", [])} for t in tipos}
@@ -142,7 +145,7 @@ def evaluar(n_docs: int, semilla: int) -> dict:
         lote_ficticio = type("L", (), {"code": f"EVAL-{semilla}"})()
         grupos = proc.separar(db, llm, lote_ficticio, paginas)
         inicios = {g[0][0].page_index for g in grupos}
-        filas, clase_ok, auto_total, auto_ok, con_tareas = [], 0, 0, 0, 0
+        filas, clase_ok, auto_total, auto_ok, con_tareas, con_evitables = [], 0, 0, 0, 0, 0
         for g in grupos:
             pags = [p for p, _ in g]
             verdad = next(
@@ -158,27 +161,27 @@ def evaluar(n_docs: int, semilla: int) -> dict:
             db.commit()
             ok_tipo = verdad is not None and verdad.tipo == tipo.key
             clase_ok += ok_tipo
-            tareas = conf < proc.UMBRAL_CLASE
+            tareas = evitables = conf < proc.UMBRAL_CLASE
             detalle = []
             for key, c in defs[tipo.key].items():
                 ia = campos.get(key) or {}
-                norm, nota = normalizar_valor(
-                    c["type"], ia.get("valor") or ia.get("valor_original"), c.get("options")
-                )
-                cf = min(float(ia.get("confianza") or 0), 0.5) if nota else float(ia.get("confianza") or 0)
-                auto = norm is not None and not nota and c["auto_accept"] <= 1 and cf >= c["auto_accept"]
+                ev = proc.evaluar_campo(c, ia, len(pags), lambda n, pags=pags: pags[n - 1].palabras)
+                norm, auto = ev["norm"], ev["estado"] == "auto_aceptado"
                 esperado = verdad.campos.get(key) if (verdad and ok_tipo) else None
                 correcto = esperado is not None and _igual(c["type"], esperado, norm)
                 if esperado is not None and auto:
                     auto_total += 1
                     auto_ok += correcto
-                if not auto and (norm is not None or c["required"]):
+                if ev["estado"] == "pendiente":
                     tareas = True
+                    if c["auto_accept"] <= 1:
+                        evitables = True
                 if esperado is not None or norm is not None:
                     detalle.append(
                         {"campo": key, "esperado": esperado, "obtenido": norm, "auto": auto, "ok": correcto}
                     )
             con_tareas += tareas
+            con_evitables += evitables
             filas.append({"paginas": [p.page_index for p in pags], "esperado": verdad.tipo if verdad else "—",
                           "obtenido": tipo.key, "confianza": round(conf, 2), "campos": detalle})  # fmt: skip
         costo = proc.gasto_mes(db) - costo0
@@ -196,6 +199,7 @@ def evaluar(n_docs: int, semilla: int) -> dict:
         "precision_autoaceptados": round(auto_ok / auto_total, 3) if auto_total else None,
         "campos_autoaceptados": auto_total,
         "documentos_con_validacion": round(con_tareas / len(grupos), 3) if grupos else 0.0,
+        "documentos_con_validacion_sin_sensibles": round(con_evitables / len(grupos), 3) if grupos else 0.0,
         "costo_usd": round(costo, 5),
         "usd_por_mil_paginas": round(costo / len(paginas) * 1000, 2) if paginas else 0.0,
         "detalle": filas,
@@ -214,7 +218,8 @@ def _inicio(docs: list[DocVerdad], dv: DocVerdad) -> int:
 def reporte_html(res: dict) -> str:
     metas = [("Separación (F1 de límites)", res["separacion_f1"], 0.95), ("Clasificación", res["clasificacion"], 0.95),
              ("Precisión de autoaceptados", res["precision_autoaceptados"], 0.98),
-             ("Documentos que requieren validación", res["documentos_con_validacion"], None)]  # fmt: skip
+             ("Documentos que requieren validación", res["documentos_con_validacion"], None),
+             ("… sin contar los datos sensibles que siempre revisa una persona", res["documentos_con_validacion_sin_sensibles"], None)]  # fmt: skip
     fila = lambda n, v, m: (  # noqa: E731
         f"<tr><td>{n}</td><td><b>{'—' if v is None else f'{v * 100:.1f}%'}</b></td>"
         f"<td>{'' if m is None else ('✔ meta ' if v is not None and v >= m else '✘ meta ') + f'{m * 100:.0f}%'}</td></tr>"

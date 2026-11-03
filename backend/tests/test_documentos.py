@@ -135,4 +135,19 @@ def test_normalizacion_local():
         {"texto": "S/", "x0": 0.21, "y0": 0.2, "x1": 0.24, "y1": 0.22},
         {"texto": "1,250.00", "x0": 0.25, "y0": 0.2, "x1": 0.35, "y1": 0.22},
     ]
-    assert ubicar(palabras, "S/ 1,250.00") == {"x0": 0.21, "y0": 0.2, "x1": 0.35, "y1": 0.22}
+    assert ubicar(palabras, "S/ 1,250.00") == {"x0": 0.21, "y0": 0.2, "x1": 0.35, "y1": 0.22, "conf": None}
+
+
+def test_ocr_corrobora_un_dni_impreso_una_sola_vez():
+    from arriera.procesamiento.documentos import evaluar_campo
+
+    dni = {"key": "dni_titular", "nombre": "DNI", "type": "dni", "required": True, "auto_accept": 0.97}
+    ia = {"valor_original": "41234518", "valor": "41234518", "confianza": 0.95, "pagina": 1}
+    una = [{"texto": "DNI:", "x0": 0.1, "y0": 0.1, "x1": 0.15, "y1": 0.12, "conf": 0.96},
+           {"texto": "41234518", "x0": 0.16, "y0": 0.1, "x1": 0.3, "y1": 0.12, "conf": 0.96}]  # fmt: skip
+    r = evaluar_campo(dni, ia, 1, lambda n: una)
+    assert r["estado"] == "auto_aceptado" and r["corroborado"]
+    dos = una + [{"texto": "41234518", "x0": 0.16, "y0": 0.5, "x1": 0.3, "y1": 0.52, "conf": 0.96}]
+    assert evaluar_campo(dni, ia, 1, lambda n: dos)["estado"] == "pendiente"
+    borroso = [{**w, "conf": 0.6} for w in una]
+    assert evaluar_campo(dni, ia, 1, lambda n: borroso)["estado"] == "pendiente"
