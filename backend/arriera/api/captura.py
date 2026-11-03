@@ -26,6 +26,7 @@ class NuevoLote(BaseModel):
     caja: str = Field(pattern=r"^C-\d{4,6}$")
     origen: str = Field("celular", pattern="^(celular|agente|red|navegador)$")
     esperadas: int | None = Field(None, ge=1, le=5000)
+    microformas: bool = False
 
 
 class PaginaOut(BaseModel):
@@ -49,6 +50,7 @@ class LoteOut(BaseModel):
     rechazos: int = 0
     paginas: list[PaginaOut] | None = None
     ia: dict | None = None
+    microformas: bool = False
 
 
 def _lote(db: Session, code: str) -> Lote:
@@ -70,6 +72,7 @@ def _out(db: Session, lote: Lote, con_paginas: bool = False) -> LoteOut:
         creado=lote.created_at,
         rechazos=sum(1 for p in pags if p.qc_status == "reescanear"),
         ia=(lote.manifest or {}).get("ia"),
+        microformas=lote.microformas,
         paginas=[
             PaginaOut(
                 id=str(p.id),
@@ -109,6 +112,7 @@ def crear(
         operator_id=u.id,
         origen=datos.origen,
         expected_pages=datos.esperadas,
+        microformas=datos.microformas,
     )
     db.add(lote)
     if caja.status == "registrada":
@@ -122,7 +126,7 @@ def crear(
         object_id=lote.code,
         ip=ctx.ip,
         user_agent=ctx.user_agent,
-        details={"caja": caja.code, "origen": datos.origen},
+        details={"caja": caja.code, "origen": datos.origen, "microformas": datos.microformas},
     )
     db.commit()
     db.refresh(lote)

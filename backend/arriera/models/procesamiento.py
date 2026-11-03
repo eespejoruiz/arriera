@@ -2,7 +2,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, Integer, String, Text, Uuid
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from arriera.db import Base
@@ -28,3 +29,29 @@ class PasoProceso(Base):
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora, index=True)
+
+
+class PasoLote(Base):
+    """Paso del sistema de producción de microformas registrado sobre un lote (quién, con qué rol y cuándo)."""
+
+    __tablename__ = "batch_steps"
+    id: Mapped[object] = mapped_column(Uuid, primary_key=True, default=uuid7)
+    batch_id: Mapped[object] = mapped_column(Uuid, ForeignKey("batches.id", ondelete="CASCADE"), index=True)
+    step: Mapped[str] = mapped_column(String(20))
+    user_id: Mapped[object] = mapped_column(Uuid, ForeignKey("users.id"))
+    role: Mapped[str] = mapped_column(String(20))
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    done_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+
+class Acta(Base):
+    __tablename__ = "acts"
+    id: Mapped[object] = mapped_column(Uuid, primary_key=True, default=uuid7)
+    kind: Mapped[str] = mapped_column(String(24))  # apertura_lote | cierre_lote | inventario | ...
+    number: Mapped[str] = mapped_column(String(40), unique=True)
+    batch_id: Mapped[object | None] = mapped_column(Uuid, ForeignKey("batches.id"), nullable=True, index=True)
+    pdf_key: Mapped[str] = mapped_column(String(300))
+    sha256: Mapped[str] = mapped_column(String(64))
+    payload: Mapped[dict] = mapped_column(JSONB, default=dict)
+    created_by: Mapped[object | None] = mapped_column(Uuid, ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)

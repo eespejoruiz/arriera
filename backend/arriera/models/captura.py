@@ -96,6 +96,7 @@ class Lote(Base):
     received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
     manifest: Mapped[dict] = mapped_column(JSONB, default=dict)
+    microformas: Mapped[bool] = mapped_column(Boolean, default=False)  # sigue los pasos de la NTP 392.030-2
     caja: Mapped[Caja] = relationship(lazy="joined")
 
 
@@ -122,6 +123,7 @@ class Pagina(Base):
     thumb_key: Mapped[str | None] = mapped_column(String(300), nullable=True)
     width: Mapped[int | None] = mapped_column(Integer, nullable=True)
     height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    dpi: Mapped[int | None] = mapped_column(Integer, nullable=True)  # resolución efectiva sobre el ancho de un A4
     is_cover: Mapped[bool] = mapped_column(Boolean, default=False)
     blank_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     skew_deg: Mapped[float | None] = mapped_column(Float, nullable=True)

@@ -33,12 +33,12 @@ export const salir = () => api<void>("/auth/logout", { method: "POST" });
 // ---------- Inventario y captura ----------
 export type Caja = { code: string; shelf_location: string | null; anios: string; series_hint: string | null; paper_condition: string; estimated_pages: number | null; captured_pages: number; status: string };
 export type PaginaLote = { id: string; indice: number; estado: string; motivo: string | null; inclinacion: number | null; ocr?: string; idioma?: string | null };
-export type Lote = { code: string; caja: string; origen: string; estado: string; recibidas: number; esperadas: number | null; creado: string; rechazos: number; paginas?: PaginaLote[] | null; ia?: IaLote | null };
+export type Lote = { code: string; caja: string; origen: string; estado: string; recibidas: number; esperadas: number | null; creado: string; rechazos: number; paginas?: PaginaLote[] | null; ia?: IaLote | null; microformas?: boolean };
 export const cajas = () => api<Caja[]>("/cajas");
 export const crearCaja = (c: Partial<Caja> & { code: string; year_from?: number; year_to?: number }) => api<Caja>("/cajas", { method: "POST", body: JSON.stringify(c) });
 export const lotes = () => api<Lote[]>("/captura/lotes");
 export const lote = (code: string) => api<Lote>(`/captura/lotes/${code}`);
-export const crearLote = (caja: string, origen = "celular") => api<Lote>("/captura/lotes", { method: "POST", body: JSON.stringify({ caja, origen }) });
+export const crearLote = (caja: string, origen = "celular", microformas = false) => api<Lote>("/captura/lotes", { method: "POST", body: JSON.stringify({ caja, origen, microformas }) });
 export const emparejar = (code: string) => api<{ url: string; qr_svg: string; vence: string }>(`/captura/lotes/${code}/emparejar`, { method: "POST" });
 export const urlHoja = (code: string) => `${API_URL}/captura/lotes/${code}/hoja.pdf`;
 export const urlEtiqueta = (code: string) => `${API_URL}/cajas/${code}/etiqueta.pdf`;
@@ -70,6 +70,17 @@ export const colaValidacion = () => api<Cola>("/validacion/cola");
 export const documento = (id: string) => api<DocDetalle>(`/documentos/${id}`);
 export const resolverTarea = (id: string, cuerpo: { accion: string; valor?: string; tipo?: string }) =>
   api<{ documento: string; estado: string; pendientes?: number }>(`/validacion/tareas/${id}`, { method: "POST", body: JSON.stringify(cuerpo) });
+// Microformas y cumplimiento (Sprint 3)
+export type PasoMf = { paso: string; nombre: string; roles: string[]; hecho: boolean; por: string | null; rol: string | null; fecha: string | null };
+export type EstadoMf = { lote: string; microformas: boolean; pasos: PasoMf[]; siguiente: string | null; paginas_bajo_300dpi: number; hash_manifiesto: string | null; actas: { id: string; tipo: string; numero: string; sha256: string }[] };
+export const estadoMicroformas = (code: string) => api<EstadoMf>(`/microformas/lotes/${code}`);
+export const registrarPaso = (code: string, paso: string, notas?: string) => api<EstadoMf>(`/microformas/lotes/${code}/pasos/${paso}`, { method: "POST", body: JSON.stringify({ notas: notas || null }) });
+export const urlActa = (id: string) => `${API_URL}/microformas/actas/${id}.pdf`;
+export type AccesoSensible = { fecha: string; usuario: string; correo: string; accion: string; documento: string; lote: string; documento_id: string; ip: string };
+export const accesosSensibles = (dias: number) => api<{ dias: number; total: number; por_usuario: { usuario: string; accesos: number }[]; accesos: AccesoSensible[] }>(`/cumplimiento/accesos-sensibles?dias=${dias}`);
+export const urlAccesosCsv = (dias: number) => `${API_URL}/cumplimiento/accesos-sensibles?dias=${dias}&formato=csv`;
+export type VerifCadena = { integra: boolean; eventos: number; ultimo_hash: string | null; primer_error_id: number | null; motivo: string | null };
+export const verificarCadena = () => api<VerifCadena>("/audit/verify-chain");
 export const svgComoImagen = (svg: string) => `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 
 // ---------- Dispositivo (celular) ----------

@@ -314,3 +314,14 @@ select.inp{appearance:auto}
   .val-pagina{position:sticky; top:84px; align-self:start; max-height:calc(100vh - 100px); overflow:auto}
   .val-campos{max-height:calc(100vh - 100px); overflow:auto; position:sticky; top:84px; align-self:start}
 }
+
+/* Microformas (Sprint 3) */
+.pasos-mf{list-style:none; margin:0; padding:0; display:grid; gap:7px; font-size:.82rem}
+.pasos-mf li{display:grid; grid-template-columns:20px 1fr; gap:8px; align-items:start; color:var(--gris)}
+.pasos-mf li b{font-weight:500}
+.pasos-mf li.hecho b{color:var(--blanco)}
+.pasos-mf li.actual b{color:var(--lima)}
+.punto-mf{width:18px; height:18px; border-radius:50%; border:1px solid var(--linea-2); display:grid; place-items:center}
+.pasos-mf li.hecho .punto-mf{background:rgba(169,182,64,.25); border-color:var(--hoja)}
+.pasos-mf li.actual .punto-mf{border-color:var(--lima)}
+.punto-mf svg{width:11px; height:11px; color:var(--lima)}

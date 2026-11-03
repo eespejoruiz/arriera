@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
+import PanelMicroformas from "@/components/PanelMicroformas";
 import {
   cajas as apiCajas, crearCaja, crearLote, emparejar, ErrorApi, lote as apiLote, lotes as apiLotes,
   svgComoImagen, urlEtiqueta, urlHoja, urlMiniatura, urlPdfLote, yo, type Caja, type Lote,
@@ -25,6 +26,7 @@ export default function CapturaReal() {
   const [sel, setSel] = useState<Lote | null>(null);
   const [modal, setModal] = useState<"lote" | "caja" | null>(null);
   const [nuevo, setNuevo] = useState<{ lote: Lote; qr?: string; vence?: string } | null>(null);
+  const [mfNuevo, setMfNuevo] = useState(false);
   const [cajaElegida, setCajaElegida] = useState("");
   const [error, setError] = useState("");
 
@@ -41,7 +43,7 @@ export default function CapturaReal() {
   const nuevoLote = async () => {
     setError("");
     try {
-      const l = await crearLote(cajaElegida, "celular");
+      const l = await crearLote(cajaElegida, "celular", mfNuevo);
       const e = await emparejar(l.code);
       setNuevo({ lote: l, qr: svgComoImagen(e.qr_svg), vence: e.vence });
       cargar();
@@ -108,6 +110,7 @@ export default function CapturaReal() {
                 {sel.estado !== "cerrado" && <button className="btn btn-sec btn-chico" onClick={() => nuevoQr(sel)}><Icono n="celular" />Emparejar celular</button>}
                 {puedePdf && sel.paginas?.some((p) => p.ocr === "ok") && <a className="btn btn-sec btn-chico" href={urlPdfLote(sel.code)} target="_blank" rel="noopener"><Icono n="descargar" />PDF buscable</a>}
               </div>
+              {sel.microformas && <PanelMicroformas code={sel.code} />}
               {sel.ia && (
                 <div className="aviso" style={{ marginBottom: 12, fontSize: ".82rem" }}><Icono n="ia" /><span>{
                   sel.ia.estado === "listo" ? <>La IA encontró <b>{sel.ia.documentos} documento{sel.ia.documentos === 1 ? "" : "s"}</b> en este lote. Lo dudoso está en <a href="/validacion/" className="lima">Validación</a>.</>
@@ -139,6 +142,7 @@ export default function CapturaReal() {
               <>
                 <div className="campo-f"><label htmlFor="caja-lote">Caja</label>
                   <select id="caja-lote" className="inp" value={cajaElegida} onChange={(e) => setCajaElegida(e.target.value)}>{cajas.map((c) => <option key={c.code} value={c.code}>{c.code} · {c.series_hint ?? "sin serie"} · {c.anios}</option>)}</select></div>
+                <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: ".86rem" }}><input type="checkbox" checked={mfNuevo} onChange={(e) => setMfNuevo(e.target.checked)} style={{ accentColor: "#DCE57A", marginTop: 3 }} /><span><b style={{ fontWeight: 500, color: "var(--blanco)" }}>Lote para microformas</b><br /><span className="gris2">Sigue los pasos de la NTP 392.030-2, exige 300 dpi y genera actas de apertura y cierre.</span></span></label>
                 {error && <p className="error-form">{error}</p>}
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}><button className="btn btn-sec" onClick={() => setModal(null)}>Cancelar</button><button className="btn btn-prim" onClick={nuevoLote}>Crear lote</button></div>
               </>

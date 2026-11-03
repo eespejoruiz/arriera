@@ -13,6 +13,8 @@ from arriera.captura.almacen import almacen
 from arriera.config import settings
 from arriera.models import ArchivoLote, Emparejamiento, Estacion, Lote, Pagina
 
+A4_ANCHO_PULGADAS = 8.27
+DPI_MICROFORMAS = 300  # NTP 392.030-2: captura a 300 dpi como mínimo
 TIPOS_IMAGEN = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
 
 
@@ -141,6 +143,10 @@ def procesar_calidad(db: Session, pagina_id) -> Pagina:
     pag.width, pag.height = r.imagen.size
     pag.blank_score, pag.blur_score, pag.skew_deg = r.tinta, r.borrosidad, r.inclinacion
     pag.qc_status, pag.qc_reason = r.estado, r.motivo
+    pag.dpi = round(min(r.imagen.size) / A4_ANCHO_PULGADAS)
+    if lote.microformas and pag.qc_status in ("ok", "corregida") and pag.dpi < DPI_MICROFORMAS:
+        pag.qc_status = "reescanear"
+        pag.qc_reason = f"Resolución de {pag.dpi} dpi; las microformas piden {DPI_MICROFORMAS} como mínimo"
     db.flush()
     actualizar_estado_lote(db, lote)
     return pag

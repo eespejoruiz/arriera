@@ -1,4 +1,4 @@
-.PHONY: dev migrate seed-demo test lint web-build
+.PHONY: dev migrate seed-demo test lint web-build eval
 
 dev:        ## Levanta todo con Docker Compose
 	docker compose up --build
@@ -18,3 +18,6 @@ lint:       ## Linter, formato y tipos
 
 web-build:  ## Compila la web
 	cd web && npm run build
+
+eval:       ## Evalúa la IA con el set de referencia DEMO (usa la IA configurada y cuenta contra el presupuesto)
+	cd backend && python -m arriera.eval --docs 12
