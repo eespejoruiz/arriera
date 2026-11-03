@@ -1,5 +1,5 @@
-"""Proveedor de IA de lenguaje (spec 7.11). Salida siempre estructurada (herramienta forzada con JSON Schema)
-y temperatura 0. Cada llamada devuelve tokens y costo para el registro de pasos y el presupuesto."""
+"""Proveedor de IA de lenguaje (spec 7.11). Salida siempre estructurada (herramienta forzada con JSON Schema).
+Los modelos 5.5 ya no aceptan `temperature`; el determinismo viene del esquema y del prompt. Cada llamada devuelve tokens y costo para el registro de pasos y el presupuesto."""
 
 import time
 from dataclasses import dataclass
@@ -60,7 +60,6 @@ class LLMAnthropic:
         cuerpo = {
             "model": modelo,
             "max_tokens": 4000,
-            "temperature": 0,
             "system": sistema,
             "messages": [{"role": "user", "content": mensaje}],
             "tools": [{"name": herramienta, "description": "Devuelve el resultado.", "input_schema": esquema}],
