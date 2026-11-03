@@ -12,6 +12,7 @@ Producto de Enrique Espejo Ruiz: gestión documental con IA para digitalizar arc
 ## Fuente de verdad
 - `docs/spec/SPEC-Arriera-v1.0.md`: spec original (nombre de trabajo «Legajo»).
 - `docs/spec/SPEC-Arriera-adenda-01.md`: nombre Arriera, API para ERP en la v1, marca fija y licencia. Si contradice al spec, manda la adenda.
+- `docs/spec/SPEC-Arriera-adenda-02.md`: planes (pago único y mensual), línea de microformas propia y roadmap del benchmark. Manda sobre el spec y la adenda 01.
 
 ## Marca y UI
 - La interfaz usa siempre la marca de Arriera: nombre, logo (`docs/marca/`) y paleta oliva. No se personaliza con los colores del cliente; el cliente aparece solo como titular de la licencia.

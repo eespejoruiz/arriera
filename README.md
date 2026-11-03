@@ -4,7 +4,7 @@ Gestión documental con IA para digitalizar archivos en papel. La IA lee cada ho
 
 - Landing: https://arriera.tech
 - Demo navegable (DATOS DEMO): https://demo.arriera.tech
-- Spec: [`docs/spec/SPEC-Arriera-v1.0.md`](docs/spec/SPEC-Arriera-v1.0.md) y [`docs/spec/SPEC-Arriera-adenda-01.md`](docs/spec/SPEC-Arriera-adenda-01.md). Si se contradicen, manda la adenda.
+- Spec: [`docs/spec/SPEC-Arriera-v1.0.md`](docs/spec/SPEC-Arriera-v1.0.md), [`adenda-01`](docs/spec/SPEC-Arriera-adenda-01.md) y [`adenda-02`](docs/spec/SPEC-Arriera-adenda-02.md). Si se contradicen, manda la adenda más reciente.
 
 ## Estado
 
