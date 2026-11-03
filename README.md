@@ -11,7 +11,7 @@ Gestión documental con IA para digitalizar archivos en papel. La IA lee cada ho
 | Parte | Estado |
 |---|---|
 | `web/` | Prototipo de UI en Next.js 15 con DATOS DEMO (12 pantallas y la app de captura del celular en `/m`). Es la base del frontend real. |
-| `backend/` | Pendiente · Sprint 0 (FastAPI, PostgreSQL 16, Redis, MinIO, autenticación con 2FA y auditoría encadenada). |
+| `backend/` | Sprint 0 · API en FastAPI con usuarios y 7 roles, ingreso con contraseña Argon2id y verificación en dos pasos (TOTP cifrado, QR), sesiones en cookie httpOnly, bloqueo tras 5 intentos y auditoría encadenada de solo inserción con verificación. 11 pruebas contra PostgreSQL real. |
 | `capture-agent/` | Pendiente · Sprint 1 (agente de captura para Windows: TWAIN/WIA, carpeta vigilada, subida por partes). |
 | `seeds/` | Pendiente · generador de DATOS DEMO y semillas por cliente. |
 | `deploy/demo/` | Imagen nginx de la demo estática. |
@@ -22,6 +22,26 @@ Gestión documental con IA para digitalizar archivos en papel. La IA lee cada ho
 - Celulares como escáner: app web en `/m`, emparejada por QR, sin instalar nada.
 - Multifuncionales de red: escanear a carpeta SMB, SFTP o correo.
 - Lectores de QR o código de barras USB/Bluetooth en modo teclado.
+
+## Desarrollo con Docker
+
+```bash
+cp .env.example .env      # completa CIFRADO_KEY, DNI_HMAC_KEY y ARRIERA_DEMO_CLAVE
+docker compose up --build # PostgreSQL, Redis, MinIO, API (http://localhost:8000/docs) y web (http://localhost:3000)
+docker compose exec api python -m arriera.seed --demo
+```
+
+Usuarios de DATOS DEMO (todos con la clave de `ARRIERA_DEMO_CLAVE`): `admin@`, `archivo@`, `captura@`, `validacion@`, `consulta@` y `auditoria@demo.arriera.tech`. Administración, archivo y auditoría piden configurar la verificación en dos pasos al primer ingreso.
+
+## Desarrollo del backend sin Docker
+
+```bash
+cd backend
+uv venv && . .venv/bin/activate && uv pip install -e ".[dev]"
+alembic upgrade head
+python -m pytest -q
+uvicorn arriera.main:app --reload
+```
 
 ## Desarrollo del prototipo
 

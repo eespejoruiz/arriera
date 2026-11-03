@@ -1,0 +1,48 @@
+# Entorno de desarrollo de Arriera.
+# Uso: cp .env.example .env (completar claves) && docker compose up --build
+name: arriera
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.0-pg16
+    environment:
+      POSTGRES_USER: arriera
+      POSTGRES_PASSWORD: arriera
+      POSTGRES_DB: arriera
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arriera"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7.4-alpine
+    ports: ["127.0.0.1:6379:6379"]
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: arriera
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-arriera-dev-secret}
+    ports: ["127.0.0.1:9000:9000", "127.0.0.1:9001:9001"]
+    volumes: [minio:/data]
+  api:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://arriera:arriera@postgres:5432/arriera
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -- -H 0.0.0.0"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    volumes: [./web:/app, web_node_modules:/app/node_modules]
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+volumes:
+  pg: {}
+  minio: {}
+  web_node_modules: {}

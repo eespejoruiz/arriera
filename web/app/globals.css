@@ -284,3 +284,5 @@ select.inp{appearance:none}
 .stat{min-width:0}
 .rejilla.stats{grid-template-columns:repeat(2, minmax(0,1fr))}
 @media (max-width:560px){ .rejilla.stats .stat .v{font-size:1.5rem} }
+.error-form{font-size:.84rem; color:#F2A585; background:rgba(224,122,78,.1); border:1px solid rgba(224,122,78,.35); border-radius:10px; padding:9px 12px}
+.btn:disabled{opacity:.55; cursor:not-allowed}
