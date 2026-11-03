@@ -56,4 +56,4 @@ Despliegue de la demo (desde la raíz): `docker build -f deploy/demo/Dockerfile 
 
 ## Licencia
 
-Software propietario de Enrique Espejo Ruiz. Ver [`LICENSE`](LICENSE). Los clientes reciben una licencia de uso limitada: no pueden revender ni renombrar el sistema; sí pueden mantenerlo y mejorarlo para su uso interno.
+Software propietario de Anomaly LA S.A.C. Ver [`LICENSE`](LICENSE). Los clientes reciben una licencia de uso limitada: no pueden revender ni renombrar el sistema; sí pueden mantenerlo y mejorarlo para su uso interno.

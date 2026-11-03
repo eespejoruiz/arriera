@@ -13,7 +13,8 @@
 |---|---|
 | Modelo de cobro | Dos planes por institución, nunca por usuario (sección 2). Reemplaza el esquema «pago único + bolsas de horas de soporte». |
 | Usuarios | Usuarios de consulta ilimitados en los dos planes. |
-| Valor legal | **Arriera certificará una línea de producción de microformas propia** (NTP 392.030-2) con **Anomaly LA SAC**, en vez de aliarse con un tercero. |
+| Titular del software | **Anomaly LA S.A.C.** es la titular del software y de la licencia (LICENSE). Aparece solo en la licencia y en los contratos; la marca pública sigue siendo Arriera, sin mención en la landing ni en el sistema. |
+| Valor legal | Línea de microformas propia, pero **la certificación (NTP 392.030-2) se tramita cuando un cliente la exija**. El modo microformas del software se construye completo en el Sprint 3. Mientras no haya línea certificada, el lote queda listo para que el fedatario de un tercero lo convierta en microforma. |
 | Mensaje principal | Titular: «Tu archivo en papel, indexado por IA y listo para microformas». Bajada: «Diez años de papel, encontrados en segundos». |
 | Alcance funcional | Se adopta todo lo que los competidores hacen mejor, incluidos el OCR multilenguaje, el editor de flujos sin código y la automatización tipo RPA (sección 4). |
 | Prioridad | El modo microformas y el panel de la Ley 29733 van antes del asistente. |
@@ -44,8 +45,7 @@ Referencia del costo para el cliente (solo sistema; el pago único sin servidor)
 - **Marco:** DL 681 y sus modificatorias, DL 827, NTP 392.030-2:2015, Ley 27269 de firmas y certificados digitales, y las directivas del AGN para eliminar originales.
 - **Qué se certifica:** la organización que administra el sistema de producción y almacenamiento de microformas: local, equipos, personal, procedimientos y software. El software solo no basta.
 - **El fedatario informático sigue siendo obligatorio** por lote: actas de apertura y cierre, conformidad y firma digital.
-- **Antes de contratar a Anomaly LA SAC:** verificar en el directorio de INACAL que esté acreditada y que su alcance cubra la NTP 392.030-2. No se encontró información pública de la empresa al 3 nov 2026.
-- **Pendiente:** a nombre de qué empresa va la línea certificada.
+- **Certificación:** se tramita cuando un cliente la exija. Antes de contratar a la certificadora, verificar en el directorio de INACAL que esté acreditada con alcance en la NTP 392.030-2.
 
 **Modo microformas en el sistema (Sprint 3):**
 - El lote sigue los pasos de la NTP como estados: recepción, preparación, digitalización, control de calidad, indización y grabación.
@@ -68,3 +68,9 @@ Referencia del costo para el cliente (solo sistema; el pago único sin servidor)
 
 - FAMENSSALUD pasa a producción al cerrar el Sprint 5. Los Sprints 3 y 5 llevan más carga que en el spec: es el riesgo a vigilar.
 - Los robots RPA solo actúan con credenciales técnicas que entrega el cliente. Cada ejecución queda en la cadena de auditoría.
+
+## 5. Cambios del 3 nov 2026, 17:17
+
+- El titular del software es Anomaly LA S.A.C. (no es la certificadora). Se corrigieron LICENSE, README y CLAUDE.md.
+- La certificación queda pospuesta hasta que un cliente la exija; el modo microformas se mantiene completo en el Sprint 3.
+- El titular de la landing, «listo para microformas», se mantiene.

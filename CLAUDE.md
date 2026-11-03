@@ -1,6 +1,6 @@
 # Arriera · instrucciones para trabajar en este repositorio
 
-Producto de Enrique Espejo Ruiz: gestión documental con IA para digitalizar archivos en papel. Primer cliente: FAMENSSALUD (fondo de ayuda mutua, archivo 2015–2025 con datos de salud).
+Producto de Enrique Espejo Ruiz, cuyo titular es Anomaly LA S.A.C. (solo en licencia y contratos; la marca pública es Arriera): gestión documental con IA para digitalizar archivos en papel. Primer cliente: FAMENSSALUD (fondo de ayuda mutua, archivo 2015–2025 con datos de salud).
 
 ## Reglas de trabajo con Enrique
 1. Responder siempre en español.
