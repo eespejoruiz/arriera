@@ -104,3 +104,14 @@ class AuditAnchor(Base):
     last_event_id: Mapped[int] = mapped_column(BigInteger)
     last_hash: Mapped[str] = mapped_column(String(64))
     sent_to: Mapped[str | None] = mapped_column(String(254), nullable=True)
+
+
+from arriera.models.captura import (  # noqa: E402,F401
+    ArchivoLote,
+    Caja,
+    Emparejamiento,
+    Estacion,
+    Lote,
+    Muestreo,
+    Pagina,
+)

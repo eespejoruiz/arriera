@@ -25,6 +25,19 @@ class Settings(BaseSettings):
     bloqueo_min: int = 15
     cors_origins: list[str] = ["http://localhost:3000"]
     totp_emisor: str = "Arriera"
+    # Almacenamiento: "s3" (MinIO/S3) o "local" (desarrollo y pruebas)
+    almacen: str = "local"
+    almacen_local_dir: str = "./.almacen"
+    s3_endpoint: str = "localhost:9000"
+    s3_seguro: bool = False
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    s3_bucket: str = "arriera"
+    # Captura
+    url_publica: str = "http://localhost:3000"
+    emparejamiento_min: int = 10
+    max_imagen_mb: int = 25
+    institucion: str = "FAMENSSALUD (DEMO)"
 
 
 @lru_cache

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from arriera import __version__
-from arriera.api import auditoria, auth, usuarios
+from arriera.api import auditoria, auth, cajas, captura, estacion, usuarios
 from arriera.config import settings
 from arriera.db import SessionLocal
 
@@ -21,7 +21,7 @@ def crear_app() -> FastAPI:
         allow_origins=cfg.cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "X-Station-Key"],
     )
 
     @app.middleware("http")
@@ -46,6 +46,9 @@ def crear_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(usuarios.router)
     app.include_router(auditoria.router)
+    app.include_router(cajas.router)
+    app.include_router(captura.router)
+    app.include_router(estacion.router)
     return app
 
 

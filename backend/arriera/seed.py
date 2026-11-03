@@ -11,7 +11,7 @@ from sqlalchemy import select
 
 from arriera.audit.cadena import registrar
 from arriera.db import SessionLocal
-from arriera.models import Role, User
+from arriera.models import Caja, Role, User
 from arriera.security import passwords
 
 ROLES = [
@@ -22,6 +22,13 @@ ROLES = [
     ("consulta", "Consulta", False),
     ("aprobador", "Aprobador de depuración", True),
     ("auditor", "Auditor u oficial de datos personales", True),
+]
+
+CAJAS_DEMO = [  # DATOS DEMO: (código, estante, desde, hasta, serie, páginas estimadas)
+    ("C-0044", "B-2", 2016, 2017, "Beneficios", 2300),
+    ("C-0045", "B-3", 2017, 2018, "Beneficios", 2200),
+    ("C-0046", "B-3", 2018, 2018, "Beneficios", 2400),
+    ("C-0047", "B-4", 2018, 2019, "Préstamos", 2100),
 ]
 
 DEMO = [  # DATOS DEMO · correos ficticios
@@ -59,6 +66,18 @@ def sembrar(demo: bool) -> None:
                     )
                 )
                 creados += 1
+            for code, estante, desde, hasta, serie, est in CAJAS_DEMO:
+                if not db.scalar(select(Caja).where(Caja.code == code)):
+                    db.add(
+                        Caja(
+                            code=code,
+                            shelf_location=estante,
+                            year_from=desde,
+                            year_to=hasta,
+                            series_hint=serie,
+                            estimated_pages=est,
+                        )
+                    )
         registrar(
             db, "sistema.semillas", actor_type="system", details={"roles": len(ROLES), "usuarios_demo": creados}
         )

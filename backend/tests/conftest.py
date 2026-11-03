@@ -9,6 +9,8 @@ os.environ["CIFRADO_KEY"] = base64.b64encode(os.urandom(32)).decode()
 os.environ["DNI_HMAC_KEY"] = base64.b64encode(os.urandom(32)).decode()
 os.environ["COOKIE_SEGURA"] = "false"
 os.environ["ARRIERA_DEMO_CLAVE"] = "Prueba-Arriera-2026"
+os.environ["ALMACEN"] = "local"
+os.environ["ALMACEN_LOCAL_DIR"] = __import__("tempfile").mkdtemp(prefix="arriera-almacen-")
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402

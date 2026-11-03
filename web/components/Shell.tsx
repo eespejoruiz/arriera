@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Icono from "./Icono";
 import Logo from "./Logo";
 import { cliente } from "@/lib/demo";
+import { modoDemo, salir, yo, type Yo } from "@/lib/api";
 
 const grupos = [
   { t: "Trabajo", items: [
@@ -27,6 +29,11 @@ const grupos = [
 export default function Shell({ children }: { children: React.ReactNode }) {
   const ruta = usePathname() || "/";
   const [abierta, setAbierta] = useState(false);
+  const router = useRouter();
+  const [usuario, setUsuario] = useState<Yo | null>(null);
+  // Con API: solo se entra con sesión completa (clave + verificación en dos pasos si el rol lo exige).
+  useEffect(() => { if (!modoDemo) yo().then(setUsuario).catch(() => router.replace("/")); }, [router]);
+  const iniciales = (usuario?.name ?? "Ana R.").split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
   const activo = (h: string) => ruta === h || ruta.startsWith(h) || (h === "/archivo/" && ruta.startsWith("/expedientes"));
   return (
     <div className="app">
@@ -41,18 +48,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <span className="nav-t">{g.t}</span>
               {g.items.map((it) => (
                 <Link key={it.h} href={it.h} className={activo(it.h) ? "activo" : ""} onClick={() => setAbierta(false)}>
-                  <Icono n={it.i} />{it.n}{it.c ? <span className="cuenta">{it.c}</span> : null}
+                  <Icono n={it.i} />{it.n}{it.c && modoDemo ? <span className="cuenta">{it.c}</span> : null}
                 </Link>
               ))}
             </div>
           ))}
         </nav>
         <div className="lateral-pie">
-          <div className="estacion">
+          {modoDemo && <div className="estacion">
             <span className="estado on"><i />5 de 6 dispositivos en línea</span>
             <b>Estación Archivo 1</b>
             <span className="gris2">Ricoh fi-8170 · lector QR</span>
-          </div>
+          </div>}
           <div className="cliente">
             <span className="logo-c">{cliente.corto}</span>
             <span><b>{cliente.nombre}</b>{cliente.detalle}</span>
@@ -70,7 +77,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </form>
           <div className="der">
             <button className="icono-btn" aria-label="Avisos"><Icono n="campana" /><span className="punto" /></button>
-            <div className="usuario"><span className="avatar">AR</span><span className="nombre"><b style={{ fontWeight: 500, color: "var(--blanco)" }}>Ana R.</b><br /><span className="gris2">Archivera</span></span></div>
+            <div className="usuario"><span className="avatar">{iniciales}</span><span className="nombre"><b style={{ fontWeight: 500, color: "var(--blanco)" }}>{usuario?.name ?? "Ana R."}</b><br /><span className="gris2">{usuario ? usuario.roles.join(", ") : "Archivera"}</span></span></div>
+            {!modoDemo && <button className="icono-btn" aria-label="Salir" title="Salir" onClick={async () => { await salir().catch(() => {}); router.replace("/"); }}><Icono n="salir" /></button>}
           </div>
         </header>
         <main className="contenido">{children}</main>
