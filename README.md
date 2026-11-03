@@ -11,10 +11,10 @@ Gestión documental con IA para digitalizar archivos en papel. La IA lee cada ho
 | Parte | Estado |
 |---|---|
 | `web/` | Prototipo de UI en Next.js 15 con DATOS DEMO (12 pantallas y la app de captura del celular en `/m`). Es la base del frontend real. |
-| `backend/` | Sprint 0 · API en FastAPI con usuarios y 7 roles, ingreso con contraseña Argon2id y verificación en dos pasos (TOTP cifrado, QR), sesiones en cookie httpOnly, bloqueo tras 5 intentos y auditoría encadenada de solo inserción con verificación. 11 pruebas contra PostgreSQL real. |
-| `capture-agent/` | Pendiente · Sprint 1 (agente de captura para Windows: TWAIN/WIA, carpeta vigilada, subida por partes). |
+| `backend/` | Sprint 0 · usuarios y 7 roles, Argon2id, verificación en dos pasos (TOTP cifrado, QR), sesiones en cookie httpOnly, bloqueo tras 5 intentos y auditoría encadenada de solo inserción.<br>Sprint 1 · inventario de cajas y muestreo, lotes `L-AAAA-NNNNNN`, hoja de lote y etiqueta de caja en PDF con QR, emparejamiento del celular por QR, subida verificada con SHA-256, almacén S3/MinIO y control de calidad automático (recorte del papel, en blanco, borrosa, inclinación con enderezado, borde cortado). 13 pruebas contra PostgreSQL real. |
+| `capture-agent/` | Pendiente · agente de captura para Windows (TWAIN/WIA, carpeta vigilada). En la v1 se empezó por el celular. |
 | `seeds/` | Pendiente · generador de DATOS DEMO y semillas por cliente. |
-| `deploy/demo/` | Imagen nginx de la demo estática. |
+| `deploy/demo/` | Imagen nginx de la web. En demo.arriera.tech la web llama a la API real en `/api` (Motor, datos en Vault). |
 
 ## Periféricos soportados en la v1
 
