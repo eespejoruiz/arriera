@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     emparejamiento_min: int = 10
     max_imagen_mb: int = 25
     institucion: str = "FAMENSSALUD (DEMO)"
+    # OCR: "tesseract" (local, DATOS DEMO y modo local), "azure" (prebuilt-read con la cuenta del cliente) o "ninguno"
+    ocr_proveedor: str = "tesseract"
+    ocr_idiomas: str = "spa+eng+por"  # paquetes de Tesseract; Azure detecta el idioma solo
+    azure_di_endpoint: str = ""
+    azure_di_key: str = ""
+    azure_di_version: str = "2024-11-30"
+    azure_di_usd_mil: float = 1.5  # referencia del spec; verificar el precio vigente
+    ocr_confianza_minima: float = 0.35  # debajo de esto, la página se marca ilegible
 
 
 @lru_cache

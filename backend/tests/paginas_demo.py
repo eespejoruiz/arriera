@@ -37,3 +37,30 @@ def pagina(variante: str = "ok", semilla: int = 1) -> bytes:
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=88)
     return buf.getvalue()
+
+
+FUENTE = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+
+def pagina_con_texto(lineas: list[str], foto: bool = True) -> bytes:
+    """Hoja con texto legible (DATOS DEMO), para probar OCR y búsqueda. Con `foto`, sobre una mesa oscura."""
+    from PIL import ImageFont
+
+    w, h = 1240, 1754
+    img = Image.new("RGB", (w, h), (246, 245, 238))
+    d = ImageDraw.Draw(img)
+    titulo = ImageFont.truetype(FUENTE, 46)
+    cuerpo = ImageFont.truetype(FUENTE, 34)
+    d.text((110, 130), lineas[0], font=titulo, fill=(25, 24, 22))
+    y = 240
+    for linea in lineas[1:]:
+        d.text((110, y), linea, font=cuerpo, fill=(30, 29, 27))
+        y += 62
+    d.text((110, h - 150), "DATOS DEMO · documento ficticio", font=cuerpo, fill=(160, 57, 42))
+    if foto:
+        mesa = Image.new("RGB", (w + 360, h + 420), (58, 46, 34))
+        mesa.paste(img, (170, 220))
+        img = mesa
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=90)
+    return buf.getvalue()

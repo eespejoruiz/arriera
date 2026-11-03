@@ -9,6 +9,7 @@ from arriera.api.deps import Contexto, contexto
 from arriera.captura import servicio
 from arriera.db import SessionLocal, get_db
 from arriera.models import Estacion, Lote, Pagina
+from arriera.procesamiento.ocr import procesar_ocr
 
 router = APIRouter(prefix="/estacion", tags=["dispositivos"])
 
@@ -41,6 +42,9 @@ def _resumen(db: Session, lote: Lote) -> dict:
 def _procesar(pid) -> None:
     with SessionLocal() as db:
         servicio.procesar_calidad(db, pid)
+        db.commit()
+    with SessionLocal() as db:  # OCR aparte: si falla, el control de calidad ya quedó guardado
+        procesar_ocr(db, pid)
         db.commit()
 
 

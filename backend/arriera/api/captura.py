@@ -13,6 +13,8 @@ from arriera.captura.hojas import hoja_de_lote
 from arriera.config import settings
 from arriera.db import get_db
 from arriera.models import Caja, Lote, Pagina, User
+from arriera.procesamiento.ocr import leer_resultado
+from arriera.procesamiento.pdf import pdf_buscable
 from arriera.security.totp import qr_svg
 
 router = APIRouter(prefix="/captura", tags=["captura"])
@@ -31,6 +33,8 @@ class PaginaOut(BaseModel):
     estado: str
     motivo: str | None
     inclinacion: float | None
+    ocr: str = "pendiente"
+    idioma: str | None = None
 
 
 class LoteOut(BaseModel):
@@ -65,7 +69,13 @@ def _out(db: Session, lote: Lote, con_paginas: bool = False) -> LoteOut:
         rechazos=sum(1 for p in pags if p.qc_status == "reescanear"),
         paginas=[
             PaginaOut(
-                id=str(p.id), indice=p.page_index, estado=p.qc_status, motivo=p.qc_reason, inclinacion=p.skew_deg
+                id=str(p.id),
+                indice=p.page_index,
+                estado=p.qc_status,
+                motivo=p.qc_reason,
+                inclinacion=p.skew_deg,
+                ocr=p.ocr_status,
+                idioma=p.ocr_lang,
             )
             for p in pags
         ]
@@ -197,4 +207,41 @@ def miniatura(pid: str, _: User = Depends(requiere_roles(*CAPTURAN)), db: Sessio
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Miniatura no disponible todavía.")
     return Response(
         almacen().leer(p.thumb_key), media_type="image/webp", headers={"Cache-Control": "private, max-age=300"}
+    )
+
+
+@router.get("/lotes/{code}/buscable.pdf")
+def pdf_del_lote(
+    code: str,
+    u: User = Depends(requiere_roles("admin", "archivero")),
+    db: Session = Depends(get_db),
+    ctx: Contexto = Depends(contexto),
+):
+    """PDF buscable del lote: páginas legibles en orden, con la capa de texto del OCR."""
+    lote = _lote(db, code)
+    pags = db.scalars(
+        select(Pagina)
+        .where(Pagina.batch_id == lote.id, Pagina.qc_status.in_(["ok", "corregida"]))
+        .order_by(Pagina.page_index)
+    ).all()
+    if not pags:
+        raise HTTPException(status.HTTP_409_CONFLICT, "El lote todavía no tiene páginas legibles.")
+    pdf = pdf_buscable(
+        [(almacen().leer(p.image_key), leer_resultado(p)) for p in pags if p.image_key],
+        titulo=f"Lote {lote.code} · Caja {lote.caja.code}",
+    )
+    registrar(
+        db,
+        "lote.pdf_descargado",
+        user_id=u.id,
+        object_type="batch",
+        object_id=lote.code,
+        ip=ctx.ip,
+        details={"paginas": len(pags)},
+    )
+    db.commit()
+    return Response(
+        pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{lote.code}.pdf"'},
     )

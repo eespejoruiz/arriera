@@ -115,3 +115,4 @@ from arriera.models.captura import (  # noqa: E402,F401
     Muestreo,
     Pagina,
 )
+from arriera.models.procesamiento import PasoProceso  # noqa: E402,F401

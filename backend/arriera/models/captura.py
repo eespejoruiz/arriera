@@ -14,7 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     Uuid,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from arriera.db import Base
@@ -130,5 +130,14 @@ class Pagina(Base):
         String(20), default="pendiente"
     )  # pendiente | ok | corregida | reescanear | en_blanco
     qc_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # OCR (Sprint 2): pendiente | ok | sin_texto | omitida | error
+    ocr_status: Mapped[str] = mapped_column(String(12), default="pendiente")
+    ocr_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ocr_conf: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ocr_lang: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    ocr_key: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    ocr_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    handwriting_ratio: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tsv: Mapped[str | None] = mapped_column(TSVECTOR, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
     __table_args__ = (UniqueConstraint("batch_id", "page_index", name="uq_pagina_por_lote"),)
