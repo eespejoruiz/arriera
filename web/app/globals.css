@@ -299,3 +299,18 @@ select.inp{appearance:none}
 .visor-pag img{display:block; width:100%; height:auto}
 .resalte{position:absolute; background:rgba(232,194,90,.32); outline:2px solid rgba(232,194,90,.95); border-radius:2px; pointer-events:none}
 .texto-leido{white-space:pre-wrap; font-size:.84rem; line-height:1.6; color:var(--gris); background:rgba(0,0,0,.25); border:1px solid var(--linea); border-radius:12px; padding:14px; max-height:280px; overflow:auto; margin:0}
+
+/* Validación real (Sprint 3) */
+.campo-val{display:grid; gap:6px; padding:10px; border-radius:12px; border:1px solid var(--linea); cursor:pointer; font-size:.84rem}
+.campo-val.pendiente{border-color:rgba(232,194,90,.35)}
+.campo-val.activo{border-color:rgba(220,229,122,.55); background:rgba(220,229,122,.05)}
+.campo-val-cab{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+.campo-val-cab label,.campo-val-cab > span:first-child{color:var(--gris)}
+.campo-val-pie{display:flex; justify-content:space-between; gap:8px; font-size:.74rem}
+.duda-txt{color:var(--duda); font-size:.76rem}
+.resalte.suave{background:rgba(220,229,122,.12); outline:1px solid rgba(169,182,64,.7)}
+select.inp{appearance:auto}
+@media (min-width:1181px){
+  .val-pagina{position:sticky; top:84px; align-self:start; max-height:calc(100vh - 100px); overflow:auto}
+  .val-campos{max-height:calc(100vh - 100px); overflow:auto; position:sticky; top:84px; align-self:start}
+}

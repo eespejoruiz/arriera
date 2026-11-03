@@ -108,6 +108,13 @@ export default function CapturaReal() {
                 {sel.estado !== "cerrado" && <button className="btn btn-sec btn-chico" onClick={() => nuevoQr(sel)}><Icono n="celular" />Emparejar celular</button>}
                 {puedePdf && sel.paginas?.some((p) => p.ocr === "ok") && <a className="btn btn-sec btn-chico" href={urlPdfLote(sel.code)} target="_blank" rel="noopener"><Icono n="descargar" />PDF buscable</a>}
               </div>
+              {sel.ia && (
+                <div className="aviso" style={{ marginBottom: 12, fontSize: ".82rem" }}><Icono n="ia" /><span>{
+                  sel.ia.estado === "listo" ? <>La IA encontró <b>{sel.ia.documentos} documento{sel.ia.documentos === 1 ? "" : "s"}</b> en este lote. Lo dudoso está en <a href="/validacion/" className="lima">Validación</a>.</>
+                  : sel.ia.estado === "procesando" ? "La IA está separando, clasificando y leyendo los documentos…"
+                  : sel.ia.estado === "pausado_presupuesto" ? "Procesamiento en pausa: se alcanzó el presupuesto mensual de IA."
+                  : sel.ia.motivo ?? sel.ia.estado}</span></div>
+              )}
               {!sel.paginas?.length ? <p className="gris" style={{ fontSize: ".86rem" }}>Esperando la primera página…</p> : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10 }}>
                   {sel.paginas.map((p) => (

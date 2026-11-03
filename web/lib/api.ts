@@ -33,7 +33,7 @@ export const salir = () => api<void>("/auth/logout", { method: "POST" });
 // ---------- Inventario y captura ----------
 export type Caja = { code: string; shelf_location: string | null; anios: string; series_hint: string | null; paper_condition: string; estimated_pages: number | null; captured_pages: number; status: string };
 export type PaginaLote = { id: string; indice: number; estado: string; motivo: string | null; inclinacion: number | null; ocr?: string; idioma?: string | null };
-export type Lote = { code: string; caja: string; origen: string; estado: string; recibidas: number; esperadas: number | null; creado: string; rechazos: number; paginas?: PaginaLote[] | null };
+export type Lote = { code: string; caja: string; origen: string; estado: string; recibidas: number; esperadas: number | null; creado: string; rechazos: number; paginas?: PaginaLote[] | null; ia?: IaLote | null };
 export const cajas = () => api<Caja[]>("/cajas");
 export const crearCaja = (c: Partial<Caja> & { code: string; year_from?: number; year_to?: number }) => api<Caja>("/cajas", { method: "POST", body: JSON.stringify(c) });
 export const lotes = () => api<Lote[]>("/captura/lotes");
@@ -58,6 +58,18 @@ export const urlImagenPagina = (id: string) => `${API_URL}/busqueda/paginas/${id
 export const urlMiniaturaBusqueda = (id: string) => `${API_URL}/busqueda/paginas/${id}/miniatura`;
 export const resumenProceso = () => api<ResumenProceso>("/procesamiento/resumen");
 export const reprocesarOcr = (code: string) => api<{ en_cola: number }>(`/procesamiento/lotes/${code}/ocr`, { method: "POST" });
+// Documentos y validación (Sprint 3)
+export type IaLote = { estado: string; motivo: string | null; documentos: number; costo_usd: number };
+export type PaginaDoc = { id: string; indice: number; orden: number };
+export type DocResumen = { id: string; titulo: string; tipo: string; tipo_nombre: string; serie: string; sensibilidad: string; estado: string; fecha: string | null; confianza_tipo: number | null; confianza: number | null; lote: string | null; caja: string | null; paginas: PaginaDoc[]; pendientes: number; persona: boolean; prioridad?: number };
+export type CampoDoc = { key: string; nombre: string; tipo: string; opciones: string[] | null; requerido: boolean; sensible: boolean; id: string | null; valor: string | null; original: string | null; confianza: number | null; estado: string; nota: string | null; pagina: number | null; caja: (Caja01 & { pagina: number | null }) | null; evidencia: string | null; fuente: string | null };
+export type TareaDoc = { id: string; tipo: "campo" | "clasificacion" | "separacion"; documento: string; campo: string | null; prioridad: number; motivo: string };
+export type DocDetalle = DocResumen & { evidencia_tipo: { frase: string; pagina: number }[]; campos: CampoDoc[]; tareas: TareaDoc[]; tipos: { key: string; nombre: string }[] };
+export type Cola = { documentos: DocResumen[]; tareas: number; total_documentos: number; validados: number };
+export const colaValidacion = () => api<Cola>("/validacion/cola");
+export const documento = (id: string) => api<DocDetalle>(`/documentos/${id}`);
+export const resolverTarea = (id: string, cuerpo: { accion: string; valor?: string; tipo?: string }) =>
+  api<{ documento: string; estado: string; pendientes?: number }>(`/validacion/tareas/${id}`, { method: "POST", body: JSON.stringify(cuerpo) });
 export const svgComoImagen = (svg: string) => `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 
 // ---------- Dispositivo (celular) ----------
