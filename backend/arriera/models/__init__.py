@@ -115,4 +115,13 @@ from arriera.models.captura import (  # noqa: E402,F401
     Muestreo,
     Pagina,
 )
+from arriera.models.documentos import (  # noqa: E402,F401
+    Documento,
+    Extraccion,
+    NodoClasificacion,
+    PaginaDocumento,
+    Persona,
+    TareaValidacion,
+    TipoDocumental,
+)
 from arriera.models.procesamiento import PasoProceso  # noqa: E402,F401

@@ -1,11 +1,12 @@
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from arriera.api.deps import Contexto, contexto, requiere_roles
+from arriera.api.documentos import ia_en_segundo_plano
 from arriera.audit.cadena import registrar
 from arriera.captura import servicio
 from arriera.captura.almacen import almacen
@@ -47,6 +48,7 @@ class LoteOut(BaseModel):
     creado: datetime
     rechazos: int = 0
     paginas: list[PaginaOut] | None = None
+    ia: dict | None = None
 
 
 def _lote(db: Session, code: str) -> Lote:
@@ -67,6 +69,7 @@ def _out(db: Session, lote: Lote, con_paginas: bool = False) -> LoteOut:
         esperadas=lote.expected_pages,
         creado=lote.created_at,
         rechazos=sum(1 for p in pags if p.qc_status == "reescanear"),
+        ia=(lote.manifest or {}).get("ia"),
         paginas=[
             PaginaOut(
                 id=str(p.id),
@@ -174,6 +177,7 @@ def emparejar(
 @router.post("/lotes/{code}/cerrar", response_model=LoteOut)
 def cerrar(
     code: str,
+    tareas: BackgroundTasks,
     u: User = Depends(requiere_roles(*CAPTURAN)),
     db: Session = Depends(get_db),
     ctx: Contexto = Depends(contexto),
@@ -187,6 +191,7 @@ def cerrar(
             status.HTTP_409_CONFLICT, f"Hay {len(pendientes)} páginas pendientes o por volver a escanear."
         )
     lote.status = "cerrado"
+    tareas.add_task(ia_en_segundo_plano, lote.id)  # separar, clasificar y extraer
     registrar(
         db,
         "lote.cerrado",

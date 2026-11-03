@@ -46,6 +46,15 @@ class Settings(BaseSettings):
     azure_di_version: str = "2024-11-30"
     azure_di_usd_mil: float = 1.5  # referencia del spec; verificar el precio vigente
     ocr_confianza_minima: float = 0.35  # debajo de esto, la página se marca ilegible
+    # IA de lenguaje: "anthropic" (llave de la cuenta que corresponda) o "ninguno"
+    llm_proveedor: str = "ninguno"
+    anthropic_api_key: str = ""
+    llm_modelo: str = "claude-haiku-5-5"  # clasificar, separar y extraer
+    llm_modelo_fino: str = "claude-sonnet-5-5"  # manuscritos y asistente
+    ia_presupuesto_usd_mes: float = 10.0  # aviso al 80 %, pausa del procesamiento al 100 %
+    # Rango de fechas válido para el archivo (validación local de lo que extrae la IA)
+    archivo_desde: int = 2010
+    archivo_hasta: int = 2026
 
 
 @lru_cache

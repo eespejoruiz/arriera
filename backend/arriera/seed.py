@@ -12,6 +12,7 @@ from sqlalchemy import select
 from arriera.audit.cadena import registrar
 from arriera.db import SessionLocal
 from arriera.models import Caja, Role, User
+from arriera.procesamiento.catalogo import sembrar_catalogo
 from arriera.security import passwords
 
 ROLES = [
@@ -49,6 +50,7 @@ def sembrar(demo: bool) -> None:
                 existentes[key] = Role(key=key, name=name, requiere_2fa=mfa)
                 db.add(existentes[key])
         db.flush()
+        tipos = sembrar_catalogo(db)
         creados = 0
         if demo:
             clave = os.environ.get("ARRIERA_DEMO_CLAVE")
@@ -79,10 +81,13 @@ def sembrar(demo: bool) -> None:
                         )
                     )
         registrar(
-            db, "sistema.semillas", actor_type="system", details={"roles": len(ROLES), "usuarios_demo": creados}
+            db,
+            "sistema.semillas",
+            actor_type="system",
+            details={"roles": len(ROLES), "usuarios_demo": creados, "tipos_documentales": tipos},
         )
         db.commit()
-        print(f"Roles listos: {len(ROLES)}. Usuarios demo creados: {creados}.")
+        print(f"Roles listos: {len(ROLES)}. Tipos documentales nuevos: {tipos}. Usuarios demo creados: {creados}.")
 
 
 if __name__ == "__main__":
