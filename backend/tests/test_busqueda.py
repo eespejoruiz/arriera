@@ -16,6 +16,7 @@ SOLICITUD = [
     "Monto solicitado: S/ 1,250.00 para la atención",
     "Adjunta la boleta de pago y el informe del médico",
     "Firma de la asociada y sello de mesa de partes",
+    "Sin préstamo pendiente con el fondo",
 ]
 ENGLISH = [
     "Medical certificate for the member",
@@ -111,6 +112,8 @@ def test_ocr_busqueda_resaltado_y_pdf_buscable(cliente):
     assert res["indice"] == 1 and res["caja"] == "C-0046"
     assert "\x02" in res["fragmento"] and "\x03" in res["fragmento"]
     assert cliente.get("/busqueda", params={"q": "huaman", "lote": lote}).json()["total"] == 1
+    # «prestamos» el stemmer lo toma como verbo; el prefijo igual encuentra «préstamo».
+    assert cliente.get("/busqueda", params={"q": "prestamos", "lote": lote}).json()["total"] == 1
     r_en = cliente.get("/busqueda", params={"q": "certificate", "lote": lote}).json()
     assert r_en["total"] == 1 and r_en["resultados"][0]["idioma"] == "en"
     assert {f["valor"] for f in r_en["facetas"]["idiomas"]} == {"en"}

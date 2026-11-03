@@ -17,6 +17,7 @@ from arriera.config import settings
 from arriera.db import SessionLocal, get_db
 from arriera.models import Lote, Pagina, PasoProceso, User
 from arriera.procesamiento.ocr import leer_resultado, procesar_ocr
+from arriera.providers.ocr import normalizar
 
 router = APIRouter(tags=["busqueda"])
 BUSCAN = ("admin", "archivero", "validador")
@@ -24,9 +25,25 @@ PROCESAN = ("admin", "archivero")
 MARCA_INI, MARCA_FIN = "\x02", "\x03"  # el cliente los convierte en <mark>; nunca HTML desde el servidor
 
 # Consulta como tsquery en español (raíces) o "simple" (palabras exactas, nombres, otros idiomas).
-TSQ = "(websearch_to_tsquery('es_unaccent', :q) || websearch_to_tsquery('simple_unaccent', :q))"
+TSQ = (
+    "(websearch_to_tsquery('es_unaccent', :q) || websearch_to_tsquery('simple_unaccent', :q)"
+    " || to_tsquery('simple_unaccent', :qp))"
+)
 # Para resaltar, cualquier término sirve: los operadores se vuelven O.
 TSQ_O = "regexp_replace(websearch_to_tsquery('{cfg}', :q)::text, '<->|<[0-9]+>|&', '|', 'g')::tsquery"
+
+
+def _prefijos(q: str) -> tuple[str, str]:
+    """Consulta por prefijos («prestamos» → presta:*): cubre plural y singular aunque el stemmer se equivoque
+    (en español, «prestamos» se reduce como verbo). Devuelve la versión con Y y la versión con O."""
+    vistas = []
+    for neg, t in re.findall(r"(-?)([a-z0-9]+)", normalizar(q)):
+        if neg or t == "or" or t in vistas:
+            continue
+        vistas.append(t if len(t) <= 4 else t[: max(4, len(t) - 2)])
+    if not vistas:
+        return "zzqqzz", "zzqqzz"
+    return " & ".join(f"{t}:*" for t in vistas), " | ".join(f"{t}:*" for t in vistas)
 
 
 def _consulta(q: str) -> str:
@@ -47,7 +64,8 @@ def buscar(
     db: Session = Depends(get_db),
 ):
     q = _consulta(q)
-    filtros, params = ["p.tsv @@ " + TSQ], {"q": q}
+    qp, qpo = _prefijos(q)
+    filtros, params = ["p.tsv @@ " + TSQ], {"q": q, "qp": qp, "qpo": qpo}
     if caja:
         filtros.append("c.code = :caja")
         params["caja"] = caja
@@ -65,7 +83,8 @@ def buscar(
         text(
             f"""SELECT p.id, b.code AS lote, c.code AS caja, p.page_index, p.ocr_lang, p.ocr_conf,
                    ts_rank_cd(p.tsv, {TSQ}) AS rango,
-                   ts_headline('es_unaccent', p.ocr_text, {TSQ_O.format(cfg="es_unaccent")},
+                   ts_headline('es_unaccent', p.ocr_text,
+                     {TSQ_O.format(cfg="es_unaccent")} || to_tsquery('simple_unaccent', :qpo),
                      'StartSel=' || chr(2) || ', StopSel=' || chr(3) ||
                      ', MaxFragments=2, MaxWords=22, MinWords=8, FragmentDelimiter= … ') AS fragmento
                 {desde} WHERE {donde}
@@ -139,9 +158,10 @@ def ver_pagina(
             text(
                 f"""SELECT i FROM unnest(CAST(:ws AS text[])) WITH ORDINALITY AS w(t, i)
                     WHERE to_tsvector('es_unaccent', t) @@ {TSQ_O.format(cfg="es_unaccent")}
-                       OR to_tsvector('simple_unaccent', t) @@ {TSQ_O.format(cfg="simple_unaccent")}"""  # noqa: S608
+                       OR to_tsvector('simple_unaccent', t) @@ {TSQ_O.format(cfg="simple_unaccent")}
+                       OR to_tsvector('simple_unaccent', t) @@ to_tsquery('simple_unaccent', :qpo)"""  # noqa: S608
             ),
-            {"ws": [w["texto"] for w in palabras], "q": _consulta(q)},
+            {"ws": [w["texto"] for w in palabras], "q": _consulta(q), "qpo": _prefijos(q)[1]},
         ).scalars()
         for i in coinciden:
             w = palabras[i - 1]
