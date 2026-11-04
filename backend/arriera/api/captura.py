@@ -194,6 +194,18 @@ def cerrar(
         raise HTTPException(
             status.HTTP_409_CONFLICT, f"Hay {len(pendientes)} páginas pendientes o por volver a escanear."
         )
+    leyendo = db.scalars(
+        select(Pagina.id).where(
+            Pagina.batch_id == lote.id,
+            Pagina.qc_status.in_(["ok", "corregida"]),
+            Pagina.ocr_status == "pendiente",
+        )
+    ).all()
+    if leyendo:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"La IA todavía está leyendo el texto de {len(leyendo)} página(s). Intenta en unos segundos.",
+        )
     lote.status = "cerrado"
     tareas.add_task(ia_en_segundo_plano, lote.id)  # separar, clasificar y extraer
     registrar(
