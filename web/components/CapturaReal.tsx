@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
 import PanelMicroformas from "@/components/PanelMicroformas";
+import { SkeletonRows } from "./Esqueleto";
 import {
   cajas as apiCajas, crearCaja, crearLote, emparejar, ErrorApi, lote as apiLote, lotes as apiLotes,
   svgComoImagen, urlEtiqueta, urlHoja, urlMiniatura, urlPdfLote, yo, type Caja, type Lote,
@@ -19,6 +20,7 @@ const hora = (iso: string) => new Date(iso).toLocaleTimeString("es-PE", { hour: 
 
 export default function CapturaReal() {
   const [lista, setLista] = useState<Lote[]>([]);
+  const [listo, setListo] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
   useEffect(() => { yo().then((u) => setRoles(u.roles)).catch(() => {}); }, []);
   const puedePdf = roles.some((r) => r === "admin" || r === "archivero");
@@ -37,6 +39,7 @@ export default function CapturaReal() {
       setCajaElegida((x) => x || c[0]?.code || "");
       if (sel) setSel(await apiLote(sel.code));
     } catch (e) { if (e instanceof ErrorApi && e.estado === 403) setError("Tu perfil no tiene acceso a Captura."); }
+    finally { setListo(true); }
   }, [sel]);
   useEffect(() => { cargar(); const i = setInterval(cargar, 5000); return () => clearInterval(i); }, [cargar]);
 
@@ -73,12 +76,12 @@ export default function CapturaReal() {
         <button className="btn btn-prim" onClick={() => { setError(""); setNuevo(null); setModal("lote"); }} disabled={!cajas.length}><Icono n="mas" />Nuevo lote</button>
       </Cab>
       {error && !modal && <p className="error-form">{error}</p>}
-      {!cajas.length && <div className="aviso"><Icono n="caja" /><span>Primero registra una caja del archivo. Cada lote pertenece a una caja.</span></div>}
+      {listo && !cajas.length && <div className="aviso"><Icono n="caja" /><span>Primero registra una caja del archivo. Cada lote pertenece a una caja.</span></div>}
 
       <div className="rejilla r-73">
         <div className="panel">
           <div className="panel-cab"><h2>Lotes</h2><span className="sub">se actualiza cada 5 segundos</span></div>
-          {lista.length === 0 ? <p className="gris">Todavía no hay lotes. Crea el primero con «Nuevo lote».</p> : (
+          {!listo ? <SkeletonRows n={4} /> : lista.length === 0 ? <p className="gris">Todavía no hay lotes. Crea el primero con «Nuevo lote».</p> : (
             <div className="tabla-env"><table className="tabla">
               <thead><tr><th>Lote</th><th>Caja</th><th className="num">Páginas</th><th>Estado</th><th /></tr></thead>
               <tbody>{lista.map((l) => (

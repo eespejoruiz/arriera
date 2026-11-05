@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
 import { accesosSensibles, urlAccesosCsv, verificarCadena, ErrorApi, type AccesoSensible, type VerifCadena } from "@/lib/api";
+import { SkeletonRows } from "./Esqueleto";
 
 // Auditoría y Ley 29733: quién vio datos sensibles (N3), cuándo y desde dónde; y la verificación de la cadena.
 export default function CumplimientoReal() {
@@ -27,6 +28,7 @@ export default function CumplimientoReal() {
       {cadena && (
         <div className={`aviso`} style={{ marginBottom: 12 }}><Icono n={cadena.integra ? "check" : "alerta"} /><span>{cadena.integra ? <>Cadena íntegra: {cadena.eventos.toLocaleString("es-PE")} eventos verificados. Última huella <span className="maq">{cadena.ultimo_hash?.slice(0, 16)}…</span></> : <>La cadena está rota en el evento {cadena.primer_error_id}: {cadena.motivo}</>}</span></div>
       )}
+      {!datos && !error && <div className="rejilla" style={{ gridTemplateColumns: "minmax(0,280px) minmax(0,1fr)", gap: 14 }}><div className="panel plano"><SkeletonRows n={3} /></div><div className="panel"><SkeletonRows n={6} /></div></div>}
       {datos && (
         <div className="rejilla" style={{ gridTemplateColumns: "minmax(0,280px) minmax(0,1fr)", gap: 14 }}>
           <div className="panel plano" style={{ display: "grid", gap: 12, alignContent: "start" }}>

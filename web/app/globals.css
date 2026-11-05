@@ -325,3 +325,128 @@ select.inp{appearance:auto}
 .pasos-mf li.hecho .punto-mf{background:rgba(169,182,64,.25); border-color:var(--hoja)}
 .pasos-mf li.actual .punto-mf{border-color:var(--lima)}
 .punto-mf svg{width:11px; height:11px; color:var(--lima)}
+
+/* =====================================================================
+   Vidrio oscuro oliva · nov 2026 (skill mejorar-ui)
+   Fondo «aurora» fijo: las tarjetas parecen vidrio sin backdrop-filter;
+   el desenfoque real solo en el menú, las barras y las hojas.
+   ===================================================================== */
+:root{
+  --glass:rgba(255,255,255,.045); --glass-strong:rgba(255,255,255,.08); --glass-edge:rgba(255,255,255,.09);
+  --glass-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 18px 40px -24px rgba(0,0,0,.7);
+  --glass-lift:0 1px 0 rgba(255,255,255,.07) inset, 0 26px 50px -24px rgba(0,0,0,.8);
+  --field:rgba(255,255,255,.055); --chrome:rgba(17,20,12,.7);
+  --r-l:24px; --r-m:14px;
+}
+body{background:var(--noche)}
+body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(60vw 50vh at 8% -8%, rgba(169,182,64,.20), transparent 62%),
+    radial-gradient(55vw 55vh at 100% 18%, rgba(220,229,122,.09), transparent 60%),
+    radial-gradient(70vw 60vh at 40% 115%, rgba(93,102,80,.30), transparent 65%),
+    var(--noche)}
+
+.glass-dark,.glass-chrome{border:1px solid var(--glass-edge); box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 24px 60px -28px rgba(0,0,0,.85)}
+.glass-dark{background:rgba(19,22,14,.72); -webkit-backdrop-filter:blur(20px) saturate(1.5); backdrop-filter:blur(20px) saturate(1.5)}
+.glass-chrome{background:var(--chrome); -webkit-backdrop-filter:blur(20px) saturate(1.5); backdrop-filter:blur(20px) saturate(1.5)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .glass-dark,.glass-chrome{background:rgba(19,22,14,.97)} }
+@media (prefers-reduced-transparency: reduce){ .glass-dark,.glass-chrome{background:var(--fondo); backdrop-filter:none; -webkit-backdrop-filter:none} body::before{display:none} }
+
+/* Marco: menú como panel flotante y barra superior flotante */
+.app{grid-template-columns:calc(var(--lateral) + 18px) minmax(0,1fr)}
+.lateral{top:14px; height:calc(100vh - 28px); margin:14px 0 14px 14px; border-radius:28px; border-right:1px solid var(--glass-edge); padding:20px 14px 14px}
+.nav a{padding:9px 12px; border-radius:12px; transition:background .15s, color .15s}
+.nav a.activo{background:linear-gradient(90deg, rgba(220,229,122,.16), rgba(220,229,122,.05)); color:var(--blanco); box-shadow:inset 0 0 0 1px rgba(220,229,122,.18)}
+.estacion,.cliente{background:rgba(255,255,255,.03); border:1px solid var(--linea)}
+.barra-sup{top:14px; margin:14px 28px 0 18px; border-radius:18px; padding:9px 10px 9px 12px; border-bottom:1px solid var(--glass-edge)}
+.buscador{background:var(--field); border-color:var(--linea); border-radius:13px; min-height:44px; padding:0 14px}
+.icono-btn{flex:none; width:44px; height:44px; border-radius:13px; background:rgba(255,255,255,.04); border-color:var(--linea)}
+.icono-btn .punto{top:10px; right:11px}
+.avatar{width:38px; height:38px}
+.contenido{padding:24px 28px 64px 18px}
+.marca-movil{display:none}
+.barra-inf{display:none}
+
+/* Piezas: vidrio sobre la aurora */
+.panel{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); border-color:var(--glass-edge); box-shadow:var(--glass-shadow)}
+.panel.plano{background:rgba(22,25,16,.62)}
+.panel.luz{background:radial-gradient(120% 90% at 50% 0%, rgba(220,229,122,.28), rgba(27,31,19,.75) 70%); border-color:rgba(220,229,122,.26)}
+.btn{border-radius:99px; min-height:40px; padding:9px 18px}
+.btn-prim{box-shadow:0 10px 26px -12px rgba(220,229,122,.55)}
+.btn-lima{box-shadow:0 10px 26px -12px rgba(220,229,122,.6)}
+.btn-chico{border-radius:99px; min-height:34px; padding:6px 13px}
+.tabs{border-radius:99px; padding:4px}
+.tabs button,.tabs a{border-radius:99px; padding:7px 14px}
+.inp{background:var(--field); border-radius:12px}
+.inp:focus,.buscador:focus-within{border-color:rgba(220,229,122,.55); box-shadow:0 0 0 3px rgba(220,229,122,.14)}
+.modal{background:rgba(27,31,19,.94); border-radius:26px; box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+.modal-fondo{-webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px)}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion: no-preference){
+  .btn,.panel,.resultado-pag{transition:transform .18s ease, box-shadow .18s ease, background .15s}
+  .btn-prim:hover,.btn-lima:hover{transform:translateY(-1px)}
+  a.panel:hover,.panel.lift:hover{transform:translateY(-2px); box-shadow:var(--glass-lift)}
+}
+
+/* Esqueletos de carga */
+.skel{display:block; background:linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.11) 37%, rgba(255,255,255,.05) 63%); background-size:400% 100%; animation:skel 1.4s ease infinite}
+@keyframes skel{0%{background-position:100% 50%} 100%{background-position:0 50%}}
+.skel-filas{display:grid; gap:2px}
+.skel-fila{display:flex; align-items:center; gap:12px; padding:11px 8px}
+.skel-pagina{width:100%; max-width:560px; justify-self:center; aspect-ratio:1/1.35; border-radius:10px; background:rgba(255,255,255,.035); border:1px solid var(--linea); padding:8% 9%; display:grid; gap:12px; align-content:start}
+
+/* Celular y tableta: sin menú lateral; barra inferior flotante + hoja «Más» */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .lateral{display:none}
+  .menu-movil{display:none}
+  .marca-movil{display:grid; place-items:center; width:44px; height:44px; flex:none}
+  .marca-movil svg{width:24px; height:29px}
+  .barra-sup{top:max(10px, env(safe-area-inset-top, 0px)); margin:max(10px, env(safe-area-inset-top, 0px)) 12px 0; padding:6px 8px; gap:8px; border-radius:18px}
+  .solo-escritorio{display:none!important}
+  .contenido{padding:20px max(16px, env(safe-area-inset-left, 0px)) calc(112px + env(safe-area-inset-bottom, 0px))}
+  .barra-inf{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:2px; position:fixed; z-index:40; left:max(10px, env(safe-area-inset-left, 0px)); right:max(10px, env(safe-area-inset-right, 0px)); bottom:calc(10px + env(safe-area-inset-bottom, 0px)); padding:6px; border-radius:24px}
+  .barra-inf a,.barra-inf button{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:56px; padding:0; border:0; border-radius:18px; background:transparent; color:var(--gris); font-size:.75rem; line-height:1.1; letter-spacing:-.03em; cursor:pointer; white-space:nowrap; min-width:0}
+  .barra-inf svg{width:21px; height:21px}
+  .barra-inf .activo{color:var(--blanco); background:rgba(220,229,122,.12)}
+  .barra-inf .activo svg{color:var(--lima)}
+  .modal-fondo{place-items:end stretch; padding:0}
+  .modal{width:100%!important; max-height:92vh; border-radius:26px 26px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom, 0px))}
+}
+.hoja-fondo{position:fixed; inset:0; z-index:70; background:rgba(5,6,3,.6); display:flex; align-items:flex-end}
+.hoja{width:100%; border-radius:28px 28px 0 0; padding:8px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display:grid; gap:14px; animation:hoja .22s ease}
+@keyframes hoja{from{transform:translateY(30px); opacity:0}}
+.hoja-asa{justify-self:center; width:40px; height:5px; border-radius:99px; background:rgba(255,255,255,.22)}
+.hoja-cab{display:flex; align-items:center; justify-content:space-between}
+.hoja-cab b{font-weight:500; color:var(--blanco)}
+.hoja-rejilla{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.hoja-rejilla a,.hoja-rejilla button{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; min-height:84px; border-radius:18px; background:rgba(255,255,255,.045); border:1px solid var(--linea); color:var(--texto); font-size:.82rem; text-align:center; padding:8px 4px}
+.hoja-rejilla svg{width:22px; height:22px; color:var(--lima)}
+.hoja-rejilla .activo{background:rgba(220,229,122,.12); border-color:rgba(220,229,122,.3)}
+.hoja-pie{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.hoja-pie .btn{min-height:44px}
+
+/* Táctil: objetivos de 44 px, campos de 16 px y textos de al menos 12 px */
+@media (pointer:coarse){
+  .btn,.btn-chico{min-height:44px}
+  .tabs button,.tabs a{min-height:44px}
+  .inp,.buscador input,select,textarea,input{font-size:16px}
+  .chip,.stat .d,.nav-t,.ia,.cuenta,.estado,.sub,small,.campo-val-pie,.logo-c{font-size:.76rem}
+  .faceta{min-height:44px}
+  .cliente .logo-c{font-size:.76rem}
+  .atajos{display:none}
+  .faceta input{width:20px; height:20px}
+  .arbol a,.arbol span.n{min-height:44px; align-items:center}
+  .tabla a.t-princ{display:inline-flex; align-items:center; min-height:44px; min-width:44px; margin:-8px 0}
+}
+
+.faceta{display:flex; justify-content:space-between; align-items:center; gap:6px; cursor:pointer}
+.faceta > span:first-child{display:inline-flex; align-items:center; gap:6px}
+.barra-inf.glass-dark{background:rgba(17,20,12,.88)}
+.hoja-pie{flex-direction:column; align-items:stretch}
+.hoja-pie .btn{width:100%}
+/* Franja sobre la barra flotante: lo que pasa por detrás al hacer scroll no asoma por encima */
+.principal::before{content:""; position:sticky; top:0; z-index:19; display:block; height:14px; margin-bottom:-14px; background:rgba(15,17,11,.35); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); -webkit-mask-image:linear-gradient(#000 50%, transparent); mask-image:linear-gradient(#000 50%, transparent)}
+@media (max-width:900px){ .principal::before{height:max(10px, env(safe-area-inset-top, 0px)); margin-bottom:calc(-1 * max(10px, env(safe-area-inset-top, 0px)))} }
+@media (min-width:1181px){
+  .val-pagina,.val-campos{top:96px; max-height:calc(100vh - 110px)}
+}

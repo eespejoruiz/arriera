@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
 import { colaValidacion, documento, resolverTarea, urlImagenPagina, ErrorApi, type CampoDoc, type Cola, type DocDetalle, type TareaDoc } from "@/lib/api";
+import { SkeletonDetail, SkeletonPagina } from "./Esqueleto";
 
 // Validación real (Sprint 3): la página a la izquierda con el dato resaltado donde se leyó; los campos a la derecha.
 // Enter acepta o guarda la corrección; Tab pasa al siguiente campo pendiente. Cada decisión queda en la auditoría.
@@ -138,6 +139,7 @@ export default function ValidacionReal() {
         {cola && <div className="tabs"><button className="on">Por validar · {cola.documentos.length} documentos · {cola.tareas} datos</button><button disabled>{cola.validados} de {cola.total_documentos} listos</button></div>}
       </Cab>
       {aviso && <div className="aviso" style={{ marginBottom: 12 }}><Icono n="alerta" /><span>{aviso}</span><button className="icono-btn" style={{ marginLeft: "auto" }} onClick={() => setAviso("")} aria-label="Cerrar aviso"><Icono n="x" /></button></div>}
+      {!cola && !aviso && <SkeletonDetail />}
       {cola && cola.documentos.length === 0 && !doc && <div className="panel"><p className="gris">No hay nada por validar. Cuando se cierre un lote, la IA separa, clasifica y extrae; aquí aparece solo lo dudoso.</p></div>}
       {(cola?.documentos.length || doc) ? (
         <div className="rejilla val-grid">
@@ -172,7 +174,7 @@ export default function ValidacionReal() {
                 )}
                 {campoActivo && !campoActivo.caja && campoActivo.valor && <p className="gris2" style={{ fontSize: ".78rem", textAlign: "center" }}>No se ubicó «{campoActivo.nombre}» en la imagen; revisa el texto de la página.</p>}
               </>
-            ) : <p className="gris">Abriendo documento…</p>}
+            ) : <SkeletonPagina />}
           </div>
 
           <div className="panel val-campos" style={{ display: "grid", gap: 10, alignContent: "start" }}>
@@ -198,7 +200,7 @@ export default function ValidacionReal() {
                     onActivar={() => { setActivo(c.key); if (c.caja?.pagina || c.pagina) setPagina(Math.max(0, (c.caja?.pagina ?? c.pagina ?? 1) - 1)); }}
                     onResuelto={trasResolver} />
                 ))}
-                <p className="gris2" style={{ fontSize: ".74rem" }}><span className="maq">Enter</span> acepta o guarda · <span className="maq">Tab</span> siguiente pendiente · <span className="maq">Ctrl+D</span> no está en el documento. Cada decisión queda en la auditoría.</p>
+                <p className="gris2 atajos" style={{ fontSize: ".74rem" }}><span className="maq">Enter</span> acepta o guarda · <span className="maq">Tab</span> siguiente pendiente · <span className="maq">Ctrl+D</span> no está en el documento. Cada decisión queda en la auditoría.</p>
               </>
             )}
           </div>

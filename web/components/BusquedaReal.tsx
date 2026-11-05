@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
+import { SkeletonPagina, SkeletonRows } from "./Esqueleto";
 import {
   buscar, verPagina, resumenProceso, urlImagenPagina, urlMiniaturaBusqueda, urlPdfLote, ErrorApi,
   type Busqueda, type PaginaVista, type ResumenProceso,
@@ -34,12 +35,13 @@ function Visor({ id, q, onCerrar, puedePdf }: { id: string; q: string; onCerrar:
       <div className="modal" style={{ width: "min(880px, 100%)" }} role="dialog" aria-modal="true" aria-label="Página encontrada" onClick={(e) => e.stopPropagation()}>
         <div className="panel-cab" style={{ marginBottom: 0 }}>
           <div>
-            <h3 style={{ fontSize: "1.05rem" }}>{v ? <>Lote <span className="maq lima">{v.lote}</span> · pág. {v.indice} de {v.total_paginas}</> : "Abriendo página…"}</h3>
+            <h3 style={{ fontSize: "1.05rem" }}>{v ? <>Lote <span className="maq lima">{v.lote}</span> · pág. {v.indice} de {v.total_paginas}</> : <span className="skel" style={{ width: 220, height: 18, borderRadius: 8 }} aria-hidden="true" />}</h3>
             {v && <span className="sub">Caja <span className="maq">{v.caja}</span> · {IDIOMAS[v.idioma ?? "?"] ?? v.idioma}{v.confianza != null ? ` · lectura ${Math.round(v.confianza * 100)}%` : ""}{v.resaltes.length ? ` · ${v.resaltes.length} coincidencia${v.resaltes.length > 1 ? "s" : ""}` : ""}</span>}
           </div>
           <button className="icono-btn" onClick={onCerrar} aria-label="Cerrar"><Icono n="x" /></button>
         </div>
         {error && <div className="aviso"><Icono n="alerta" /><span>{error}</span></div>}
+        {!v && !error && <SkeletonPagina alto={620} />}
         {v && (
           <>
             <div className="visor-pag">
@@ -113,6 +115,7 @@ export default function BusquedaReal() {
           {tesseract && <span className="gris2" style={{ fontSize: ".74rem", marginLeft: "auto" }}>OCR {resumen?.proveedor_activo} · {tesseract.paginas} páginas leídas · US$ {tesseract.usd_por_mil.toFixed(2)} por mil · {tesseract.segundos_por_pagina} s por página</span>}
         </div>
         {error && <div className="aviso"><Icono n="alerta" /><span>{error}</span></div>}
+        {cargando && !res && <div className="panel" style={{ padding: 14 }}><SkeletonRows n={5} avatar etiqueta="Buscando" /></div>}
         {res && (
           <div className="rejilla bus-res" style={{ gap: 14 }}>
             <div className="panel plano" style={{ padding: 14, display: "grid", gap: 14, alignContent: "start", fontSize: ".82rem" }}>
@@ -121,7 +124,7 @@ export default function BusquedaReal() {
                   <b style={{ color: "var(--blanco)", fontWeight: 500 }}>{t}</b>
                   {ops.length === 0 && <span className="gris2">—</span>}
                   {ops.map((o) => (
-                    <label key={o.valor} style={{ display: "flex", justifyContent: "space-between", gap: 6, cursor: "pointer" }}>
+                    <label key={o.valor} className="faceta">
                       <span><input type="checkbox" checked={activo === o.valor} onChange={() => filtrar(tipo, o.valor)} style={{ accentColor: "#DCE57A" }} /> {tipo === "idioma" ? IDIOMAS[o.valor] ?? o.valor : <span className="maq">{o.valor}</span>}</span>
                       <span className="gris2">{o.n}</span>
                     </label>

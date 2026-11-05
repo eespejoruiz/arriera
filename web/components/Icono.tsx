@@ -32,6 +32,7 @@ const P: Record<string, string> = {
   volver: "M19 12H5M11 6l-6 6 6 6",
   ia: "M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z",
   menu: "M4 7h16M4 12h16M4 17h16",
+  cuadricula: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   cortar: "M6 7a2 2 0 1 0 0 .01M6 17a2 2 0 1 0 0 .01M8 8l12 9M8 16l12-9",
   unir: "M8 6v12M16 6v12M8 12h8",
   copiar: "M8 8h11v13H8zM5 16H4V3h11v1",
