@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Response, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from arriera.audit.cadena import registrar
 from arriera.captura import servicio
 from arriera.captura.almacen import almacen
 from arriera.captura.hojas import hoja_de_lote
+from arriera.captura.importar import importar_archivo
 from arriera.config import settings
 from arriera.db import get_db
 from arriera.models import Caja, Lote, Pagina, User
@@ -24,7 +25,7 @@ CAPTURAN = ("admin", "archivero", "operador")
 
 class NuevoLote(BaseModel):
     caja: str = Field(pattern=r"^C-\d{4,6}$")
-    origen: str = Field("celular", pattern="^(celular|agente|red|navegador)$")
+    origen: str = Field("celular", pattern="^(celular|agente|red|navegador|importacion)$")
     esperadas: int | None = Field(None, ge=1, le=5000)
     microformas: bool = False
 
@@ -176,6 +177,33 @@ def emparejar(
     db.commit()
     url = f"{settings().url_publica.rstrip('/')}/m/?t={token}"
     return {"url": url, "qr_svg": qr_svg(url), "vence": vence}
+
+
+@router.post("/lotes/{code}/importar", status_code=201)
+async def importar(
+    code: str,
+    tareas: BackgroundTasks,
+    archivo: UploadFile = File(...),
+    u: User = Depends(requiere_roles(*CAPTURAN)),
+    db: Session = Depends(get_db),
+    ctx: Contexto = Depends(contexto),
+):
+    """Sube un PDF o una imagen que ya es digital; sus páginas siguen el mismo flujo que las escaneadas."""
+    from arriera.api.estacion import _procesar  # mismo procesamiento en segundo plano que el escáner
+
+    lote = _lote(db, code)
+    datos = await archivo.read()
+    try:
+        nuevas = importar_archivo(
+            db, lote, u.id, datos, archivo.content_type or "", archivo.filename or "archivo", ctx.ip
+        )
+    except servicio.ErrorCaptura as e:
+        db.rollback()
+        raise HTTPException(e.estado, e.mensaje) from e
+    db.commit()
+    for p in nuevas:
+        tareas.add_task(_procesar, p.id)
+    return {"paginas": [p.page_index for p in nuevas], "duplicado": not nuevas}
 
 
 @router.post("/lotes/{code}/cerrar", response_model=LoteOut)

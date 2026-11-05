@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     url_publica: str = "http://localhost:3000"
     emparejamiento_min: int = 10
     max_imagen_mb: int = 25
+    max_importacion_mb: int = 60  # PDF o imagen subida desde el navegador (importación)
+    # Plazos de atención de solicitudes, en días hábiles (lunes a viernes). Cada cliente los ajusta a su norma
+    # y a su política interna; los valores por defecto son un punto de partida, no un dictamen legal.
+    plazo_copia: int = 5
+    plazo_copia_hc: int = 5
+    plazo_acceso_datos: int = 20
+    plazo_constancia: int = 5
     institucion: str = "FAMENSSALUD (DEMO)"
     # OCR: "tesseract" (local, DATOS DEMO y modo local), "azure" (prebuilt-read con la cuenta del cliente) o "ninguno"
     ocr_proveedor: str = "tesseract"

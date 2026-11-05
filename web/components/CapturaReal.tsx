@@ -5,7 +5,7 @@ import Icono from "@/components/Icono";
 import PanelMicroformas from "@/components/PanelMicroformas";
 import { SkeletonRows } from "./Esqueleto";
 import {
-  cajas as apiCajas, crearCaja, crearLote, emparejar, ErrorApi, lote as apiLote, lotes as apiLotes,
+  cajas as apiCajas, crearCaja, crearLote, emparejar, ErrorApi, importarArchivo, lote as apiLote, lotes as apiLotes,
   svgComoImagen, urlEtiqueta, urlHoja, urlMiniatura, urlPdfLote, yo, type Caja, type Lote,
 } from "@/lib/api";
 
@@ -26,7 +26,9 @@ export default function CapturaReal() {
   const puedePdf = roles.some((r) => r === "admin" || r === "archivero");
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [sel, setSel] = useState<Lote | null>(null);
-  const [modal, setModal] = useState<"lote" | "caja" | null>(null);
+  const [modal, setModal] = useState<"lote" | "caja" | "importar" | null>(null);
+  const [archivos, setArchivos] = useState<File[]>([]);
+  const [avance, setAvance] = useState<{ hecho: number; total: number; paginas: number; repetidos: number; errores: string[] } | null>(null);
   const [nuevo, setNuevo] = useState<{ lote: Lote; qr?: string; vence?: string } | null>(null);
   const [mfNuevo, setMfNuevo] = useState(false);
   const [cajaElegida, setCajaElegida] = useState("");
@@ -52,6 +54,21 @@ export default function CapturaReal() {
       cargar();
     } catch (e) { setError(e instanceof ErrorApi ? e.message : "No se pudo crear el lote."); }
   };
+  const importar = async () => {
+    setError("");
+    if (!archivos.length) { setError("Elige al menos un archivo."); return; }
+    try {
+      const l = await crearLote(cajaElegida, "importacion", false);
+      const a = { hecho: 0, total: archivos.length, paginas: 0, repetidos: 0, errores: [] as string[] };
+      setAvance({ ...a });
+      for (const f of archivos) {
+        try { const r = await importarArchivo(l.code, f); a.paginas += r.paginas.length; if (r.duplicado) a.repetidos += 1; }
+        catch (e) { a.errores.push(`${f.name}: ${e instanceof ErrorApi ? e.message : "no se pudo subir"}`); }
+        a.hecho += 1; setAvance({ ...a });
+      }
+      setSel(await apiLote(l.code)); cargar();
+    } catch (e) { setError(e instanceof ErrorApi ? e.message : "No se pudo crear el lote de importación."); }
+  };
   const nuevoQr = async (l: Lote) => {
     const e = await emparejar(l.code);
     setNuevo({ lote: l, qr: svgComoImagen(e.qr_svg), vence: e.vence }); setModal("lote");
@@ -73,6 +90,7 @@ export default function CapturaReal() {
     <>
       <Cab titulo="Captura" maq="cada hoja entra con su caja y su lote" desc="Crea un lote, empareja un celular con el QR y mira llegar las páginas con su control de calidad.">
         <button className="btn btn-sec" onClick={() => { setError(""); setModal("caja"); }}><Icono n="caja" />Registrar caja</button>
+        <button className="btn btn-sec" onClick={() => { setError(""); setArchivos([]); setAvance(null); setModal("importar"); }} disabled={!cajas.length}><Icono n="descargar" />Importar PDF</button>
         <button className="btn btn-prim" onClick={() => { setError(""); setNuevo(null); setModal("lote"); }} disabled={!cajas.length}><Icono n="mas" />Nuevo lote</button>
       </Cab>
       {error && !modal && <p className="error-form">{error}</p>}
@@ -86,7 +104,7 @@ export default function CapturaReal() {
               <thead><tr><th>Lote</th><th>Caja</th><th className="num">Páginas</th><th>Estado</th><th /></tr></thead>
               <tbody>{lista.map((l) => (
                 <tr key={l.code} className="fila-link" onClick={async () => setSel(await apiLote(l.code))}>
-                  <td><span className="t-princ maq">{l.code}</span><span className="t-sec">{l.origen} · {hora(l.creado)}</span></td>
+                  <td><span className="t-princ maq">{l.code}</span><span className="t-sec">{l.origen === "importacion" ? "importación" : l.origen} · {hora(l.creado)}</span></td>
                   <td className="maq">{l.caja}</td>
                   <td className="num">{l.recibidas}</td>
                   <td><span className={`chip ${estadoLote[l.estado]?.[1] ?? "neutro"}`}>{l.rechazos ? `${l.rechazos} por repetir` : estadoLote[l.estado]?.[0] ?? l.estado}</span></td>
@@ -159,6 +177,35 @@ export default function CapturaReal() {
                   <a className="btn btn-sec" href={urlHoja(nuevo.lote.code)} target="_blank" rel="noopener"><Icono n="doc" />Imprimir hoja de lote</a>
                   <button className="btn btn-prim" onClick={() => setModal(null)}>Listo</button>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {modal === "importar" && (
+        <div className="modal-fondo" onClick={() => setModal(null)}>
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="t-imp" onClick={(e) => e.stopPropagation()} style={{ width: "min(600px,100%)" }}>
+            <div className="panel-cab" style={{ margin: 0 }}><h2 id="t-imp">Importar archivos digitales</h2><button className="icono-btn" aria-label="Cerrar" onClick={() => setModal(null)}><Icono n="x" /></button></div>
+            <p className="gris" style={{ fontSize: ".88rem" }}>PDF escaneados, exportaciones de otro gestor o fotos sueltas. Cada página pasa por el mismo control de calidad, lectura e IA que una hoja escaneada. El archivo original se guarda con su huella.</p>
+            {!avance ? (
+              <>
+                <div className="campo-f"><label htmlFor="caja-imp">Caja a la que pertenecen</label>
+                  <select id="caja-imp" className="inp" value={cajaElegida} onChange={(e) => setCajaElegida(e.target.value)}>{cajas.map((c) => <option key={c.code} value={c.code}>{c.code} · {c.series_hint ?? "sin serie"} · {c.anios}</option>)}</select></div>
+                <label className="soltar">
+                  <input type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp" onChange={(e) => setArchivos(Array.from(e.target.files ?? []))} />
+                  <Icono n="doc" /><b>{archivos.length ? `${archivos.length} archivo${archivos.length > 1 ? "s" : ""} elegido${archivos.length > 1 ? "s" : ""}` : "Elige PDF o imágenes"}</b>
+                  <span className="gris2">Hasta 60 MB y 500 páginas por archivo</span>
+                </label>
+                {error && <p className="error-form">{error}</p>}
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}><button className="btn btn-sec" onClick={() => setModal(null)}>Cancelar</button><button className="btn btn-prim" onClick={importar} disabled={!archivos.length}>Importar</button></div>
+              </>
+            ) : (
+              <div style={{ display: "grid", gap: 10 }}>
+                <div className="barra-prog"><i style={{ width: `${Math.round((avance.hecho / avance.total) * 100)}%` }} /></div>
+                <p>{avance.hecho} de {avance.total} archivos · {avance.paginas} páginas nuevas{avance.repetidos ? ` · ${avance.repetidos} ya estaban` : ""}</p>
+                {avance.errores.map((e) => <p key={e} className="error-form">{e}</p>)}
+                {avance.hecho === avance.total && <button className="btn btn-prim" onClick={() => setModal(null)}>Ver el lote</button>}
               </div>
             )}
           </div>

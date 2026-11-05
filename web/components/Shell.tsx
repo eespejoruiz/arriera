@@ -19,6 +19,7 @@ const grupos: { t: string; items: Item[] }[] = [
   { t: "Archivo", items: [
     { h: "/archivo/", n: "Archivo", i: "archivo" },
     { h: "/busqueda/", n: "Búsqueda y asistente", i: "busqueda", corto: "Búsqueda" },
+    { h: "/solicitudes/", n: "Solicitudes", i: "enviar" },
     { h: "/conservacion/", n: "Conservación", i: "conservacion" },
   ]},
   { t: "Control", items: [

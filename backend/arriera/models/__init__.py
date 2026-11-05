@@ -125,3 +125,4 @@ from arriera.models.documentos import (  # noqa: E402,F401
     TipoDocumental,
 )
 from arriera.models.procesamiento import Acta, PasoLote, PasoProceso  # noqa: E402,F401
+from arriera.models.solicitudes import ItemSolicitud, Solicitud  # noqa: E402,F401

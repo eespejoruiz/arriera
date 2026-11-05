@@ -21,7 +21,7 @@ SQL = text(
     WITH accesos AS (
       SELECT e.id, e.ts, e.user_id, e.action, e.ip::text AS ip, d.id AS doc_id
         FROM audit_events e JOIN documents d ON d.id::text = e.object_id
-       WHERE e.action = 'documento.visto' AND e.ts >= :desde AND d.sensitivity = 'N3'
+       WHERE e.action IN ('documento.visto', 'documento.copiado') AND e.ts >= :desde AND d.sensitivity = 'N3'
       UNION ALL
       SELECT e.id, e.ts, e.user_id, e.action, e.ip::text, d.id
         FROM audit_events e
@@ -39,7 +39,11 @@ SQL = text(
      LIMIT 2000
     """
 )
-ACCION = {"documento.visto": "Abrió el documento", "pagina.vista": "Vio una página"}
+ACCION = {
+    "documento.visto": "Abrió el documento",
+    "pagina.vista": "Vio una página",
+    "documento.copiado": "Emitió una copia",
+}
 
 
 @router.get("/accesos-sensibles")

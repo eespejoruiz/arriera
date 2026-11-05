@@ -81,6 +81,32 @@ export const accesosSensibles = (dias: number) => api<{ dias: number; total: num
 export const urlAccesosCsv = (dias: number) => `${API_URL}/cumplimiento/accesos-sensibles?dias=${dias}&formato=csv`;
 export type VerifCadena = { integra: boolean; eventos: number; ultimo_hash: string | null; primer_error_id: number | null; motivo: string | null };
 export const verificarCadena = () => api<VerifCadena>("/audit/verify-chain");
+// ---------- Importación de archivos ya digitales ----------
+export async function importarArchivo(code: string, archivo: File): Promise<{ paginas: number[]; duplicado: boolean }> {
+  const fd = new FormData();
+  fd.append("archivo", archivo);
+  const r = await fetch(`${API_URL}/captura/lotes/${code}/importar`, { method: "POST", body: fd, credentials: "include" });
+  const datos = await r.json().catch(() => ({}));
+  if (!r.ok) throw new ErrorApi(r.status, typeof datos.detail === "string" ? datos.detail : "No se pudo importar el archivo.");
+  return datos;
+}
+
+// ---------- Solicitudes de copia y de acceso ----------
+export type SolicitudResumen = { id: string; numero: string; tipo: string; tipo_nombre: string; estado: string; estado_nombre: string; solicitante: string; relacion: string | null; recibida: string; vence: string; dias_habiles: number | null; documentos: number; entregada: string | null };
+export type SolicitudDetalle = SolicitudResumen & { documento: string | null; contacto: string | null; detalle: string | null; plazo_dias: number; items: DocResumen[]; sugeridos: DocResumen[]; ocultamiento: string; copia: { paginas: number; sha256: string } | null; nota_entrega: string | null; historial: { fecha: string; accion: string; por: string; detalle: string | null }[] };
+export type TiposSolicitud = { tipos: { key: string; nombre: string; plazo_dias: number }[]; ocultamientos: { key: string; nombre: string }[] };
+export const tiposSolicitud = () => api<TiposSolicitud>("/solicitudes/tipos");
+export const solicitudes = (estado = "") => api<SolicitudResumen[]>(`/solicitudes${estado ? `?estado=${estado}` : ""}`);
+export const solicitud = (id: string) => api<SolicitudDetalle>(`/solicitudes/${id}`);
+export const crearSolicitud = (c: { tipo: string; solicitante: string; documento?: string; contacto?: string; relacion?: string; detalle?: string }) =>
+  api<SolicitudDetalle>("/solicitudes", { method: "POST", body: JSON.stringify(c) });
+export const agregarASolicitud = (id: string, documento_id: string) => api<SolicitudDetalle>(`/solicitudes/${id}/documentos`, { method: "POST", body: JSON.stringify({ documento_id }) });
+export const quitarDeSolicitud = (id: string, did: string) => api<SolicitudDetalle>(`/solicitudes/${id}/documentos/${did}`, { method: "DELETE" });
+export const generarCopia = (id: string, ocultamiento: string) => api<SolicitudDetalle>(`/solicitudes/${id}/copia`, { method: "POST", body: JSON.stringify({ ocultamiento }) });
+export const cambiarEstadoSolicitud = (id: string, estado: string, nota?: string) => api<SolicitudDetalle>(`/solicitudes/${id}/estado`, { method: "POST", body: JSON.stringify({ estado, nota: nota || null }) });
+export const urlCopiaSolicitud = (id: string) => `${API_URL}/solicitudes/${id}/copia.pdf`;
+export const buscarDocumentos = (q: string) => api<DocResumen[]>(`/documentos?${new URLSearchParams({ q })}`);
+
 export const svgComoImagen = (svg: string) => `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 
 // ---------- Dispositivo (celular) ----------

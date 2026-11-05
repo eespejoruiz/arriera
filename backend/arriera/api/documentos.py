@@ -29,6 +29,7 @@ from arriera.models import (
 )
 from arriera.procesamiento.documentos import gasto_mes, procesar_lote_ia, vincular_persona
 from arriera.procesamiento.normalizar import normalizar_valor
+from arriera.security.cifrado import hmac_busqueda
 
 router = APIRouter(tags=["documentos"])
 VEN = ("admin", "archivero", "validador")
@@ -113,10 +114,18 @@ def _resumen_doc(db: Session, d: Documento) -> dict:
 def listar(
     lote: str | None = None,
     estado: str | None = None,
+    q: str | None = None,
     _: User = Depends(requiere_roles(*VEN)),
     db: Session = Depends(get_db),
 ):
+    texto = (q or "").strip()
     q = select(Documento).order_by(Documento.created_at.desc()).limit(200)
+    if texto:  # por título (tipo y persona) o por DNI exacto de la persona
+        dni = "".join(ch for ch in texto if ch.isdigit())
+        cond = Documento.title.ilike(f"%{texto}%")
+        if len(dni) == 8:
+            cond = cond | Documento.person_id.in_(select(Persona.id).where(Persona.dni_hash == hmac_busqueda(dni)))
+        q = q.where(cond)
     if lote:
         q = q.join(Lote, Lote.id == Documento.batch_id).where(Lote.code == lote)
     if estado:

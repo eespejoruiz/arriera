@@ -13,6 +13,7 @@ from arriera.api import (
     documentos,
     estacion,
     microformas,
+    solicitudes,
     usuarios,
 )
 from arriera.config import settings
@@ -64,6 +65,7 @@ def crear_app() -> FastAPI:
     app.include_router(documentos.router)
     app.include_router(microformas.router)
     app.include_router(cumplimiento.router)
+    app.include_router(solicitudes.router)
     return app
 
 

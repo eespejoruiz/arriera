@@ -450,3 +450,26 @@ body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:non
 @media (min-width:1181px){
   .val-pagina,.val-campos{top:96px; max-height:calc(100vh - 110px)}
 }
+
+/* Importación de archivos y solicitudes */
+.soltar{position:relative; display:grid; place-items:center; gap:6px; text-align:center; padding:26px 16px; border-radius:18px; border:1px dashed rgba(220,229,122,.4); background:rgba(220,229,122,.04); cursor:pointer; font-size:.88rem}
+.soltar:hover{background:rgba(220,229,122,.08)}
+.soltar input{position:absolute; inset:0; opacity:0; cursor:pointer}
+.soltar svg{width:26px; height:26px; color:var(--lima)}
+.soltar b{font-weight:500; color:var(--blanco)}
+.sol-grid{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; align-items:start}
+@media (max-width:1100px){ .sol-grid{grid-template-columns:1fr} }
+.sol-item{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px; border-radius:14px; border:1px solid var(--linea); background:rgba(255,255,255,.025)}
+.sol-item .tx{display:grid; gap:2px; min-width:0}
+.sol-item .tx b{font-weight:500; color:var(--blanco); font-size:.9rem}
+.sol-item .tx span{font-size:.78rem; color:var(--gris)}
+.plazo{font-variant-numeric:tabular-nums; white-space:nowrap}
+.plazo.vence{color:var(--ambar)} .plazo.vencida{color:var(--falta)} .plazo.ok{color:var(--hoja)}
+.linea-tiempo{list-style:none; margin:0; padding:0; display:grid; gap:8px; font-size:.82rem}
+.linea-tiempo li{display:grid; grid-template-columns:12px 1fr; gap:10px}
+.linea-tiempo li::before{content:""; width:8px; height:8px; margin-top:6px; border-radius:50%; background:var(--hoja)}
+.radio-op{display:flex; gap:10px; align-items:center; min-height:44px; padding:8px 12px; border-radius:12px; border:1px solid var(--linea); cursor:pointer; font-size:.86rem}
+.radio-op:has(input:checked){border-color:rgba(220,229,122,.5); background:rgba(220,229,122,.06)}
+.radio-op input{accent-color:#DCE57A; width:18px; height:18px}
+.tabs.llenas{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); width:100%}
+.tabs.llenas button{white-space:nowrap; padding-left:6px; padding-right:6px}
