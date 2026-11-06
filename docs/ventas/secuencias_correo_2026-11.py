@@ -56,11 +56,40 @@ def cabecera():
 </tr></table></td></tr>"""
 
 
+FUNCIONES = [
+    ("digitaliza", "Digitaliza", "Sus cajas de papel y sus PDF, en un solo archivo."),
+    ("lee", "Lee", "La IA lee cada hoja, impresa o manuscrita."),
+    ("clasifica", "Clasifica", "Separa cada documento y lo pone en su expediente."),
+    ("encuentra", "Encuentra", "Por nombre, DNI o fecha, en segundos."),
+    ("responde", "Responde y resume", "Pregúntele a su archivo y le contesta con la página exacta."),
+    ("protege", "Protege", "Permisos, registro de cada acceso y servidor a su nombre."),
+]
+
+
+def que_hace():
+    celdas = []
+    for ic, et, tx in FUNCIONES:
+        celdas.append(f"""<td class="tile" width="50%" valign="top" style="padding:6px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid {LINEA};border-radius:16px"><tr><td style="padding:14px 14px 16px">
+<img src="{IMG}{ic}.png" width="40" height="40" alt="" style="display:block;border:0;width:40px;height:40px;margin:0 0 8px">
+<p style="margin:0;font-family:{F};font-size:16px;font-weight:800;color:{NOCHE}">{et}</p>
+<p style="margin:4px 0 0;font-family:{F};font-size:14px;line-height:1.4;color:{GRIS}">{tx}</p></td></tr></table></td>""")
+    filas = "".join(f"<tr>{celdas[i]}{celdas[i + 1]}</tr>" for i in range(0, 6, 2))
+    return f"""<tr><td style="padding:22px 32px 6px" class="px">
+<p style="margin:0 0 8px;font-family:{F};font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:{HOJA}">Qué es Arriera</p>
+<h1 style="margin:0;font-family:{F};font-size:32px;line-height:1.15;font-weight:800;color:{NOCHE};letter-spacing:-.02em" class="h1">Digitalice su archivo en papel<br>
+<span style="display:inline-block;margin-top:8px;background:{HOJA};background-image:linear-gradient(100deg,{HOJA},{LIMA});color:{NOCHE};padding:4px 14px 6px;border-radius:12px">y deje que la IA trabaje por usted</span></h1>
+<p style="margin:14px 0 14px;font-family:{F};font-size:17px;line-height:1.5;color:{TINTA}">Sus cajas se vuelven un archivo digital que <b>se lee, se ordena y se busca solo</b>. Lo que hoy le toma una mañana a su equipo, con Arriera toma segundos.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">{filas}</table>
+</td></tr>
+<tr><td style="padding:18px 32px 0" class="px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid {LINEA};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>"""
+
+
 def titular(kicker, linea, resalte):
     return f"""<tr><td style="padding:22px 32px 8px" class="px">
-<p style="margin:0 0 10px;font-family:{F};font-size:14px;color:{GRIS}">{kicker}</p>
-<h1 style="margin:0;font-family:{F};font-size:34px;line-height:1.15;font-weight:800;color:{NOCHE};letter-spacing:-.02em" class="h1">{linea}<br>
-<span style="display:inline-block;margin-top:8px;background:{HOJA};background-image:linear-gradient(100deg,{HOJA},{LIMA});color:{NOCHE};padding:4px 14px 6px;border-radius:12px">{resalte}</span></h1>
+<p style="margin:0 0 10px;font-family:{F};font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:{OXIDO}">Por qué importa · {kicker}</p>
+<h2 style="margin:0;font-family:{F};font-size:27px;line-height:1.2;font-weight:800;color:{NOCHE};letter-spacing:-.01em" class="h2">{linea}<br>
+<span style="display:inline-block;margin-top:6px;background:#FBEDE5;color:{NOCHE};border-bottom:3px solid {OXIDO};padding:2px 10px 4px;border-radius:10px">{resalte}</span></h2>
 </td></tr>"""
 
 
@@ -108,6 +137,15 @@ def pasos(items, muestra=None):
 <span style="display:inline-block;background:{colores[i]};color:{MARFIL};font-family:{F};font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px">{et}</span>
 <p style="margin:8px 0 0;font-family:{F};font-size:15px;line-height:1.5;color:{TINTA}">{tx}</p>{extra}</td></tr></table>"""
     return filas
+
+
+def solucion(etiqueta, texto, muestra):
+    chip = (f'<span style="display:inline-block;margin-top:10px;background:{MARFIL};border:1px dashed {HOJA};border-radius:8px;'
+            f'padding:4px 8px;font-family:{FM};font-size:13px;color:{MUSGO}">{muestra}</span>') if muestra else ""
+    return f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid {LINEA};border-left:5px solid {HOJA};border-radius:16px">
+<tr><td style="padding:18px 20px 20px">
+<span style="display:inline-block;background:{MUSGO};color:{LIMA};font-family:{F};font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px">{etiqueta}</span>
+<p style="margin:10px 0 0;font-family:{F};font-size:16px;line-height:1.55;color:{TINTA}">{texto}</p>{chip}</td></tr></table>"""
 
 
 def antes_despues(items):
@@ -178,7 +216,7 @@ def html(pre, filas):
 body{{margin:0;padding:0;background:#E7E9DD}} img{{-ms-interpolation-mode:bicubic}} a{{text-decoration:none}}
 @media (max-width:620px){{
  .px{{padding-left:18px!important;padding-right:18px!important}}
- .h1{{font-size:28px!important}} .hide-m{{display:none!important}} .cifra{{font-size:38px!important}}
+ .h1{{font-size:26px!important}} .h2{{font-size:23px!important}} .hide-m{{display:none!important}} .cifra{{font-size:38px!important}}
  .col{{display:block!important;width:auto!important}} .sep{{display:block!important;height:6px!important;width:auto!important}}
 }}
 </style></head>
@@ -195,7 +233,7 @@ body{{margin:0;padding:0;background:#E7E9DD}} img{{-ms-interpolation-mode:bicubi
 # parrafos, pregunta, bloque: ("pasos", titulo, items, muestra) | ("antes", titulo, items) | ("opciones", titulo).
 
 def c3(kicker, foto, cifra, texto, fuente, parrafo, preg):
-    return {"asuntos": ["PUBLICIDAD | ¿Cierro este tema?", None], "pre": "Responda con un número y listo.",
+    return {"asuntos": ["PUBLICIDAD | ¿Cierro este tema?", None], "pre": "Arriera digitaliza su archivo y la IA lo busca por usted. ¿Lo vemos en 20 minutos?",
             "kicker": kicker, "titular": ("Último correo:", "¿cierro este tema?"),
             "banner": (foto, "Equipo revisando su archivo digital en una laptop", cifra, texto, fuente),
             "parrafos": ["No quiero llenar su bandeja, así que este es mi último correo sobre este tema.", parrafo],
@@ -208,7 +246,7 @@ SECTORES = {
         "segmento": "Clínicas, hospitales privados, policlínicos, laboratorios y centros de diagnóstico",
         "c1": {"asuntos": ["PUBLICIDAD | El oficio llegó y la historia salió por correo",
                            "PUBLICIDAD | ¿Quién decide qué sale de su archivo de historias?"],
-               "pre": "S/ 69,550 de multa por responder un oficio de buena fe.",
+               "pre": "Arriera digitaliza sus historias y la IA las lee, ordena y busca por usted.",
                "kicker": "Para clínicas con historias en papel",
                "titular": ("¿Quién decide qué sale", "de su archivo?"),
                "banner": ("clinica.jpg", "Recepción de una clínica entregando información a una paciente", "S/ 69,550",
@@ -223,7 +261,7 @@ SECTORES = {
                    "HC-0412 · DNI ····4518 · 14/03/2019")},
         "c2": {"asuntos": ["PUBLICIDAD | Si hoy se filtra una historia, ¿sabría quién la vio?",
                            "PUBLICIDAD | 125 UIT por un dato de salud"],
-               "pre": "La primera pregunta del regulador es la que el papel no responde.",
+               "pre": "Historias digitales con registro de cada acceso: la IA las lee y las busca por usted.",
                "kicker": "Datos de salud y Ley 29733",
                "titular": ("Si se filtra una historia,", "¿sabría quién la vio?"),
                "banner": ("validando.jpg", "Persona revisando un documento digital en pantalla", "125 UIT",
@@ -245,7 +283,7 @@ SECTORES = {
         "nombre": "Notarías", "sensible": False, "segmento": "Notarías de Lima y provincias",
         "c1": {"asuntos": ["PUBLICIDAD | Una escritura matriz no tiene segunda copia",
                            "PUBLICIDAD | Una tubería rota y un archivo menos"],
-               "pre": "El protocolo no tiene respaldo hasta que alguien se lo da.",
+               "pre": "Arriera digitaliza su protocolo y la IA lo lee, ordena y busca por usted.",
                "kicker": "Para notarías con protocolo en papel",
                "titular": ("Una escritura matriz", "no tiene segunda copia"),
                "banner": ("notaria.jpg", "Notaria consultando un tomo antiguo del protocolo junto a una tablet", "2020",
@@ -260,7 +298,7 @@ SECTORES = {
                    "K-18233 · COMPRAVENTA · 07/06/1999")},
         "c2": {"asuntos": ["PUBLICIDAD | ¿Quién pidió esa copia, y con qué derecho?",
                            "PUBLICIDAD | El testimonio que se entregó a quien no debía"],
-               "pre": "Cada copia emitida, con nombre, calidad y fecha.",
+               "pre": "Protocolo digital: la IA encuentra cualquier escritura por nombre o DNI en segundos.",
                "kicker": "Testimonios y copias certificadas",
                "titular": ("¿Quién pidió esa copia,", "y con qué derecho?"),
                "banner": ("escaner.jpg", "Persona digitalizando documentos con un escáner", "Ica, 2025",
@@ -283,7 +321,7 @@ SECTORES = {
         "segmento": "Fondos de ayuda mutua, mutualidades, derramas y cooperativas de ahorro y crédito",
         "c1": {"asuntos": ["PUBLICIDAD | Cuando la familia de un asociado viene por el beneficio",
                            "PUBLICIDAD | ¿Ese beneficio se pagó con todos los requisitos?"],
-               "pre": "El expediente que nadie encuentra siempre es el de alguien que espera.",
+               "pre": "Arriera digitaliza el archivo del fondo y la IA lo lee, ordena y busca por usted.",
                "kicker": "Para fondos y mutuales con archivo en papel",
                "titular": ("El expediente que falta", "siempre es el urgente"),
                "banner": ("archivera.jpg", "Archivera buscando expedientes en una caja de archivo", "1 hoja",
@@ -298,7 +336,7 @@ SECTORES = {
                    "SUBSIDIO · DNI ····4518 · S/ 1,200.00")},
         "c2": {"asuntos": ["PUBLICIDAD | Los informes médicos de sus asociados son datos sensibles",
                            "PUBLICIDAD | Su fondo ya necesita un Oficial de Datos Personales"],
-               "pre": "760 fiscalizaciones en 2025 y una obligación que no depende del tamaño.",
+               "pre": "Archivo digital con permisos y registro de accesos: la IA lo lee y lo busca por usted.",
                "kicker": "Datos de salud de los asociados",
                "titular": ("Sus informes médicos", "ya son datos sensibles"),
                "banner": ("validando.jpg", "Persona revisando un expediente digital en pantalla", "760",
@@ -320,7 +358,7 @@ SECTORES = {
         "segmento": "Estudios de abogados y estudios contables",
         "c1": {"asuntos": ["PUBLICIDAD | El requerimiento tiene plazo. Su archivo, no",
                            "PUBLICIDAD | Hasta 25 UIT por cada documento que no aparece"],
-               "pre": "Cuando el documento está en un WhatsApp, la multa la paga su cliente.",
+               "pre": "Arriera junta su papel, PDF y WhatsApp en un archivo que la IA lee y busca por usted.",
                "kicker": "Para estudios contables y de abogados",
                "titular": ("El requerimiento tiene plazo.", "Su archivo, no."),
                "banner": ("contadora.jpg", "Contadora trabajando con archivadores y una laptop", "25 UIT",
@@ -335,7 +373,7 @@ SECTORES = {
                    "RUC 20······533 · FACTURA F001-2041 · 03/2021")},
         "c2": {"asuntos": ["PUBLICIDAD | Cuando un asociado se va, ¿qué se lleva?",
                            "PUBLICIDAD | Parte de su archivo vive en celulares ajenos"],
-               "pre": "El orden del archivo, y a veces una copia, sale por la puerta.",
+               "pre": "Un solo archivo del estudio: la IA lo lee, lo clasifica y lo busca por usted.",
                "kicker": "El archivo del estudio",
                "titular": ("Cuando alguien se va,", "¿qué se lleva?"),
                "banner": ("celular.jpg", "Documento fotografiado con un celular", "10 años",
@@ -357,7 +395,7 @@ SECTORES = {
         "segmento": "Corredores de seguros, ajustadores, AFOCAT y fondos de siniestros",
         "c1": {"asuntos": ["PUBLICIDAD | Fines de noviembre: trazabilidad con documentos",
                            "PUBLICIDAD | La SBS ya pide rastrear cada operación con su sustento"],
-               "pre": "La Res. SBS 02164-2026 entra en vigencia en semanas.",
+               "pre": "Arriera digitaliza sus expedientes y la IA los clasifica, folia y busca por usted.",
                "kicker": "Para AFOCAT, corredores y ajustadores",
                "titular": ("Cada movimiento,", "con su documento"),
                "banner": ("escaner-2.jpg", "Persona digitalizando expedientes con un escáner", "Fin de nov.",
@@ -372,7 +410,7 @@ SECTORES = {
                    "CAT 0045-2023 · SINIESTRO · 12/08/2023")},
         "c2": {"asuntos": ["PUBLICIDAD | El siniestro que se paga tarde por una hoja",
                            "PUBLICIDAD | Trazabilidad sin foliar a mano"],
-               "pre": "Un documento que falta demora el pago y el cliente se lo cobra a usted.",
+               "pre": "Expedientes digitales: la IA clasifica cada documento y numera cada página.",
                "kicker": "Expedientes de siniestro",
                "titular": ("El siniestro que se paga", "tarde por una hoja"),
                "banner": ("validando.jpg", "Persona revisando un expediente digital en pantalla", "1 hoja",
@@ -393,7 +431,7 @@ SECTORES = {
         "segmento": "Universidades e institutos privados, colegios profesionales",
         "c1": {"asuntos": ["PUBLICIDAD | El egresado que necesita su certificado para el viernes",
                            "PUBLICIDAD | Un legajo de 2009, en segundos"],
-               "pre": "La urgencia es del egresado; la queja, de la institución.",
+               "pre": "Arriera digitaliza su archivo central y la IA lo lee, ordena y busca por usted.",
                "kicker": "Para universidades y colegios profesionales",
                "titular": ("Un certificado de 2009,", "para el viernes"),
                "banner": ("archivera.jpg", "Archivera buscando legajos en una caja de archivo", "Viernes",
@@ -407,7 +445,7 @@ SECTORES = {
                    "COD 2009-1043 · ACTA · CICLO 2009-II")},
         "c2": {"asuntos": ["PUBLICIDAD | Educación, entre los sectores que más fiscaliza la ANPD",
                            "PUBLICIDAD | Los legajos de sus alumnos también son datos personales"],
-               "pre": "Dos universidades ya fueron sancionadas por el uso de datos personales.",
+               "pre": "Legajos digitales con permisos por área: la IA los lee y los busca por usted.",
                "kicker": "Datos personales de alumnos y colegiados",
                "titular": ("Educación está en la mira", "de la ANPD"),
                "banner": ("escaner-2.jpg", "Persona digitalizando legajos con un escáner", "Top 4",
@@ -432,6 +470,22 @@ ASUNTO_B_C3 = {"salud": "PUBLICIDAD | Última nota sobre sus historias", "notari
 for _k, _s in SECTORES.items():
     _s["c3"]["asuntos"][1] = ASUNTO_B_C3[_k]
 
+# Correo 1: la solución concreta al dolor del sector (la sección «Qué es Arriera» ya explica lo general).
+SOLUCION = {
+    "salud": ("Cada pedido, con registro",
+              "Cuando llega un pedido del paciente, de un familiar o de una autoridad, Arriera registra quién lo pidió y en calidad de qué, qué documentos salen y quién los entrega. Lo que no corresponde se tacha de verdad en el PDF, y la copia sale en minutos, no en 5 días hábiles."),
+    "notarias": ("Un respaldo fiel de cada folio",
+                 "Cada página del protocolo queda digitalizada con su huella digital, en un servidor a nombre de la notaría. Y como la IA lee otorgantes, DNI y fechas, encuentra una escritura por nombre o DNI en segundos, aunque el usuario no traiga el número de kardex."),
+    "fondos": ("Pague con el expediente completo",
+               "El expediente de cualquier asociado aparece en segundos, con su solicitud, informes y boletas. Y antes de pagar, Arriera avisa si al trámite le falta un requisito."),
+    "estudios": ("Todo el archivo del estudio, en un lugar",
+                 "Papel, PDF y las fotos que hoy llegan por WhatsApp o correo entran al mismo archivo. La IA extrae cliente, RUC, expediente y fechas, y usted reúne lo que pide SUNAT o el juzgado en minutos. Se conecta por API con su sistema."),
+    "seguros": ("Expedientes foliados y trazables",
+                "La IA separa y clasifica cada documento del siniestro, extrae póliza, asegurado, fechas y montos, y numera cada página con su huella digital. Todo queda en una auditoría que nadie puede alterar."),
+    "educacion": ("Constancias con plazo, no con suerte",
+                  "El legajo de cualquier egresado aparece en segundos por nombre, código o DNI. Cada constancia sale con plazo, historial y entrega registrada, para que secretaría sepa qué está pendiente y desde cuándo."),
+}
+
 PERFIL_A_SECTOR = {
     "Fondo / mutual / cooperativa": "fondos", "Notaría": "notarias", "Clínica / hospital privado": "salud",
     "Laboratorio / diagnóstico": "salud", "Estudio de abogados": "estudios", "Estudio contable": "estudios",
@@ -442,11 +496,12 @@ PERFIL_A_SECTOR = {
 TIEMPOS = [(0, None), (3, "if_no_reply"), (5, "if_no_reply")]
 
 
-def armar(c, sensible):
-    filas = [cabecera(), titular(c["kicker"], *c["titular"]), banner(*c["banner"]), cuerpo(c["parrafos"]), pregunta(c["pregunta"])]
+def armar(c, sensible, clave):
+    filas = [cabecera(), que_hace(), titular(c["kicker"], *c["titular"]), banner(*c["banner"]), cuerpo(c["parrafos"]), pregunta(c["pregunta"])]
     b = c["bloque"]
     if b[0] == "pasos":
-        filas.append(seccion(b[1], pasos(b[2], b[3])))
+        et, tx = SOLUCION[clave]
+        filas.append(seccion("Cómo lo resuelve Arriera", solucion(et, tx, b[3])))
     elif b[0] == "antes":
         filas.append(seccion(b[1], antes_despues(b[2])))
     else:
@@ -462,6 +517,6 @@ def secuencias():
         for i, k in enumerate(("c1", "c2", "c3")):
             c = s[k]
             pasos_.append({"orden": i + 1, "asunto": c["asuntos"][0], "asunto_b": c["asuntos"][1], "pre": c["pre"],
-                           "html": armar(c, s["sensible"]), "dias": TIEMPOS[i][0], "condicion": TIEMPOS[i][1]})
+                           "html": armar(c, s["sensible"], clave), "dias": TIEMPOS[i][0], "condicion": TIEMPOS[i][1]})
         out.append({"clave": clave, "nombre": f"Arriera · {s['nombre']} · 3 correos", "segmento": s["segmento"], "pasos": pasos_})
     return out
