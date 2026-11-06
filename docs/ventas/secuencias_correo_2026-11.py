@@ -32,6 +32,7 @@ Fuentes de los hechos citados (revisadas el 05-nov-2026):
 - gob.pe (MINJUSDH): sanción a dos universidades por usar datos personales con fines publicitarios sin consentimiento.
 """
 
+DEMO = "https://arriera.tech/demo/"
 WA = "https://wa.me/51913527489?text=Hola%20Enrique%2C%20quiero%20agendar%20la%20demo%20de%20Arriera"
 IMG = "https://arriera.tech/correo/"
 
@@ -81,6 +82,8 @@ def que_hace():
 <span style="display:inline-block;margin-top:8px;background:{HOJA};background-image:linear-gradient(100deg,{HOJA},{LIMA});color:{NOCHE};padding:4px 14px 6px;border-radius:12px">y deje que la IA trabaje por usted</span></h1>
 <p style="margin:14px 0 14px;font-family:{F};font-size:17px;line-height:1.5;color:{TINTA}">Sus cajas se vuelven un archivo digital que <b>se lee, se ordena y se busca solo</b>. Lo que hoy le toma una mañana a su equipo, con Arriera toma segundos.</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{filas}</table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:14px 0 0"><tr><td style="border-radius:999px;border:2px solid {MUSGO}">
+<a href="{DEMO}" style="display:inline-block;padding:11px 22px;font-family:{F};font-size:15px;font-weight:800;color:{MUSGO};text-decoration:none;border-radius:999px">Véalo por dentro: demo abierta, sin registro &rarr;</a></td></tr></table>
 </td></tr>
 <tr><td style="padding:18px 32px 0" class="px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid {LINEA};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>"""
 
@@ -184,7 +187,7 @@ def oferta(sensible, boton="Agendar la demo por WhatsApp"):
 <p style="margin:10px 0 20px;font-family:{F};font-size:15px;line-height:1.5;color:#C9CCBC">{detalle}</p>
 <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:999px;background:{LIMA}">
 <a href="{WA}" style="display:inline-block;padding:14px 26px;font-family:{F};font-size:16px;font-weight:800;color:{NOCHE};text-decoration:none;border-radius:999px">{boton} &rarr;</a></td></tr></table>
-<p style="margin:14px 0 0;font-family:{F};font-size:14px;color:#C9CCBC">O responda este correo con el día y la hora que le acomoden.</p>
+<p style="margin:14px 0 0;font-family:{F};font-size:14px;line-height:1.5;color:#C9CCBC">O responda este correo con el día y la hora que le acomoden. ¿Quiere verlo antes? Entre a la <a href="{DEMO}" style="color:{LIMA};text-decoration:underline">demo abierta en arriera.tech/demo</a>, sin registro.</p>
 </td></tr></table></td></tr>"""
 
 
