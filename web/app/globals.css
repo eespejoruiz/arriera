@@ -187,7 +187,7 @@ select.inp{appearance:none}
 
 /* ---------- Ingreso ---------- */
 .ingreso{min-height:100vh; display:grid; grid-template-columns:1.2fr minmax(360px, 480px); background:var(--noche)}
-.ingreso-foto{background:#5E6552 url("/paisaje.webp") 60% 100%/cover no-repeat; position:relative}
+.ingreso-foto{background:#5E6552 url("./paisaje.webp") 60% 100%/cover no-repeat; position:relative}
 .ingreso-foto::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(15,17,11,0) 60%, var(--noche))}
 .ingreso-caja{display:flex; flex-direction:column; justify-content:center; gap:22px; padding:48px max(28px, env(safe-area-inset-right, 0px)) 48px 40px}
 .ingreso-marca{display:flex; align-items:center; gap:12px}
@@ -473,3 +473,8 @@ body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:non
 .radio-op input{accent-color:#DCE57A; width:18px; height:18px}
 .tabs.llenas{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); width:100%}
 .tabs.llenas button{white-space:nowrap; padding-left:6px; padding-right:6px}
+
+/* Demo pública: botón para agendar, siempre visible en la barra superior */
+.demo-cta{background:var(--lima, #DCE57A); color:#0F110B; font-weight:700; min-height:40px}
+.demo-cta:hover{background:#E8EE9C}
+@media (pointer:coarse){ .demo-cta{min-height:44px} }

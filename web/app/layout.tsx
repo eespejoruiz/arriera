@@ -8,7 +8,7 @@ const elite = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--fo
 export const metadata: Metadata = {
   title: { default: "Arriera", template: "%s · Arriera" },
   description: "Gestión documental con IA",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/favicon.svg` },
 };
 export const viewport: Viewport = { themeColor: "#0F110B", width: "device-width", initialScale: 1, viewportFit: "cover" };
 

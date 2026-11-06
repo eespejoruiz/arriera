@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
-import { resultados, cajas } from "@/lib/demo";
+import { resultados, cajas, cliente } from "@/lib/demo";
 
 export const metadata = { title: "Archivo" };
 
@@ -15,14 +15,14 @@ const expedientes = [
 export default function Archivo() {
   return (
     <>
-      <Cab titulo="Archivo" maq="fondo, serie, subserie y expediente" desc="La estructura del archivo de FAMENSSALUD. Puedes crear, renombrar y mover carpetas; cada cambio queda registrado.">
+      <Cab titulo="Archivo" maq="fondo, serie, subserie y expediente" desc={`La estructura del archivo de ${cliente.nombre}. Puedes crear, renombrar y mover carpetas; cada cambio queda registrado.`}>
         <button className="btn btn-sec"><Icono n="mas" />Nueva carpeta</button>
         <Link className="btn btn-prim" href="/busqueda/"><Icono n="busqueda" />Buscar en el archivo</Link>
       </Cab>
       <div className="rejilla arch-grid">
         <div className="panel plano">
           <ul className="arbol">
-            <li><span className="n"><b style={{ color: "var(--blanco)", fontWeight: 500 }}>FAMENSSALUD</b><small>48,210</small></span>
+            <li><span className="n"><b style={{ color: "var(--blanco)", fontWeight: 500 }}>{cliente.nombre}</b><small>48,210</small></span>
               <ul>
                 <li><a href="#">Asociados<small>12,310</small></a></li>
                 <li><a href="#">Aportes<small>4,210</small></a></li>

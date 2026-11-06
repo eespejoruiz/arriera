@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Cab, QR } from "@/components/ui";
 import Icono from "@/components/Icono";
-import { lotes, estadoLote, rechazos, dispositivos, cajas } from "@/lib/demo";
+import { lotes, estadoLote, rechazos, dispositivos, cajas, cliente } from "@/lib/demo";
 
 const origenes = [
   { k: "usb", t: "Escáner USB", d: "Ricoh fi-8170 en Estación Archivo 1", i: "escaner" },
@@ -124,7 +124,7 @@ export default function CapturaDemo() {
             ) : (
               <div className="rejilla r2" style={{ alignItems: "center" }}>
                 <div className="papel" style={{ display: "grid", justifyItems: "center", alignContent: "space-between", fontFamily: "Arial, sans-serif", padding: "8% 6%" }}>
-                  <div style={{ textAlign: "center" }}><b style={{ fontSize: 13, letterSpacing: ".1em" }}>HOJA DE LOTE</b><br /><span style={{ fontSize: 9 }}>FAMENSSALUD (DEMO)</span></div>
+                  <div style={{ textAlign: "center" }}><b style={{ fontSize: 13, letterSpacing: ".1em" }}>HOJA DE LOTE</b><br /><span style={{ fontSize: 9 }}>{cliente.nombre.toUpperCase()} (DEMO)</span></div>
                   <QR texto={`ARR1|B|${codigo}|${caja}`} tam={150} color="#14160F" fondo="#ECEBDF" />
                   <b style={{ fontSize: 18, fontFamily: "var(--f-maq)" }}>{codigo}</b>
                   <span style={{ fontSize: 9, textAlign: "center" }}>Caja {caja} · Ana R. · 03/11/2026 12:04<br /><b>Poner como primera hoja</b></span>

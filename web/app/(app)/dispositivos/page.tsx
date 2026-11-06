@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Cab, QR } from "@/components/ui";
 import Icono from "@/components/Icono";
-import { dispositivos } from "@/lib/demo";
+import { dispositivos, cliente } from "@/lib/demo";
 
 const tipos = [
   { k: "escaner", t: "Escáner USB", d: "Ricoh, Fujitsu, Epson, Canon y otros con TWAIN o WIA", i: "escaner" },
@@ -67,7 +67,7 @@ export default function Dispositivos() {
               <div style={{ display: "grid", gap: 12 }}>
                 <p>Configura en la multifuncional un destino de escaneo. Arriera acepta cualquiera de estos:</p>
                 <div className="rejilla r3" style={{ gap: 10 }}>
-                  {[["Carpeta de red (SMB)", "\\\\arriera\\entrada-red"], ["FTP seguro (SFTP)", "sftp://captura.arriera.local"], ["Correo", "escaneos@famenssalud.arriera.tech"]].map(([t, v]) => (
+                  {[["Carpeta de red (SMB)", "\\\\arriera\\entrada-red"], ["FTP seguro (SFTP)", "sftp://captura.arriera.local"], ["Correo", `escaneos@${cliente.dominio.replace(".demo", "")}.arriera.tech`]].map(([t, v]) => (
                     <div className="panel plano" key={t} style={{ padding: 12, display: "grid", gap: 6 }}><b style={{ color: "var(--blanco)", fontWeight: 500, fontSize: ".86rem" }}>{t}</b><span className="maq lima" style={{ fontSize: ".78rem", overflowWrap: "anywhere" }}>{v}</span></div>
                   ))}
                 </div>

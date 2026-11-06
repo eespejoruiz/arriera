@@ -1,6 +1,6 @@
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
-import { integraciones, webhooks } from "@/lib/demo";
+import { integraciones, webhooks, cliente } from "@/lib/demo";
 
 export const metadata = { title: "Integraciones" };
 
@@ -30,7 +30,7 @@ export default function Integraciones() {
           <div className="tabla-env"><table className="tabla">
             <thead><tr><th>Llave</th><th>Integración</th><th>Alcances</th><th>Último uso</th></tr></thead>
             <tbody>
-              <tr><td className="maq lima">ark_live_7f2c••••</td><td>Odoo FAMENSSALUD</td><td className="gris">documentos:escribir, documentos:leer, busqueda, embed:emitir</td><td className="gris">hace 1 min</td></tr>
+              <tr><td className="maq lima">ark_live_7f2c••••</td><td>Odoo {cliente.nombre}</td><td className="gris">documentos:escribir, documentos:leer, busqueda, embed:emitir</td><td className="gris">hace 1 min</td></tr>
               <tr><td className="maq lima">ark_live_19ad••••</td><td>Starsoft Contabilidad</td><td className="gris">documentos:escribir, documentos:leer</td><td className="gris">hace 14 min</td></tr>
               <tr><td className="maq gris2">ark_test_c08e••••</td><td>Pruebas</td><td className="gris">todos (solo DATOS DEMO)</td><td className="gris">ayer</td></tr>
             </tbody>
@@ -56,7 +56,7 @@ export default function Integraciones() {
   "usuario_externo": "odoo:jperez",
   "vida_segundos": 600 }
 
-→ <iframe src="https://archivo.famenssalud.pe
+→ <iframe src="https://archivo.${cliente.dominio}
    /embed/persona/…?t=eyJ…">`}</pre>
           <div className="panel" style={{ background: "#F5F5F2", color: "#333", borderColor: "#ddd", padding: 0, overflow: "hidden" }}>
             <div style={{ background: "#71639e", color: "#fff", padding: "8px 14px", fontSize: ".8rem", fontFamily: "Arial, sans-serif" }}>Odoo · Contactos › Rosa Huamán Quispe</div>

@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Icono from "./Icono";
 import Logo from "./Logo";
-import { cliente } from "@/lib/demo";
+import { cliente, BASE, demoPublica } from "@/lib/demo";
 import { modoDemo, salir, yo, type Yo } from "@/lib/api";
 
 type Item = { h: string; n: string; i: string; c?: string; corto?: string };
@@ -87,12 +87,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <div className="principal">
         <header className="barra-sup glass-chrome">
           <Link href="/inicio/" className="marca-movil" aria-label="Arriera, inicio"><Logo /></Link>
-          <form className="buscador" action="/busqueda/" role="search">
+          <form className="buscador" action={`${BASE}/busqueda/`} role="search">
             <Icono n="busqueda" />
             <input id="buscar-global" name="q" placeholder="Busca por nombre, DNI, fecha o escribe una pregunta" aria-label="Buscar en el archivo" />
             <kbd>/</kbd>
           </form>
           <div className="der">
+            {demoPublica && <a className="btn btn-prim demo-cta" href="https://wa.me/51913527489?text=Hola%20Enrique%2C%20vi%20la%20demo%20de%20Arriera%20y%20quiero%20verla%20con%20mi%20archivo" target="_blank" rel="noopener">Agendar<span className="solo-escritorio" style={{ marginLeft: -4 }}>demo con mi archivo</span></a>}
             <button className="icono-btn solo-escritorio" aria-label="Avisos"><Icono n="campana" /><span className="punto" /></button>
             <div className="usuario"><span className="avatar">{iniciales}</span><span className="nombre"><b style={{ fontWeight: 500, color: "var(--blanco)" }}>{usuario?.name ?? "Ana R."}</b><br /><span className="gris2">{usuario ? usuario.roles.join(", ") : "Archivera"}</span></span></div>
             {!modoDemo && <button className="icono-btn solo-escritorio" aria-label="Salir" title="Salir" onClick={fuera}><Icono n="salir" /></button>}

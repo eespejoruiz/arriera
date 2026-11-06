@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import Icono from "@/components/Icono";
 import { configurar2fa, ingresar, modoDemo, verificar2fa, ErrorApi } from "@/lib/api";
+import { cliente, demoPublica } from "@/lib/demo";
+
+const WA = "https://wa.me/51913527489?text=Hola%20Enrique%2C%20vi%20la%20demo%20de%20Arriera%20y%20quiero%20verla%20con%20mi%20archivo";
 
 type Paso = "clave" | "verificar" | "configurar";
 
@@ -66,11 +69,19 @@ export default function Ingreso() {
       <div className="ingreso-foto" aria-hidden="true" />
       <div className="ingreso-caja">
         <div className="ingreso-marca"><Logo /><b>Arriera</b></div>
-        <span className="pill"><span className="p" />{modoDemo ? "FAMENSSALUD · demostración" : "FAMENSSALUD · archivo digital"}</span>
-        {paso === "clave" && (
+        <span className="pill"><span className="p" />{modoDemo ? `${cliente.nombre} · demostración` : `${cliente.nombre} · archivo digital`}</span>
+        {demoPublica && (
+          <div className="ingreso-form">
+            <h1>Recorre Arriera por dentro<span className="maq lima">demo abierta · sin registro</span></h1>
+            <p className="gris">Un archivo de ejemplo ya digitalizado: verás cómo se captura una caja, cómo la IA lee y clasifica cada hoja, cómo se busca por nombre o DNI y cómo se atiende un pedido de copia. Todos los nombres, DNI y documentos son <b>DATOS DEMO</b>, ficticios.</p>
+            <button className="btn btn-prim" type="button" onClick={() => router.push("/inicio/")}>Entrar a la demo<Icono n="flecha" /></button>
+            <a className="btn btn-sec" href={WA} target="_blank" rel="noopener">Quiero verla con mi archivo</a>
+          </div>
+        )}
+        {!demoPublica && paso === "clave" && (
           <form className="ingreso-form" onSubmit={enviarClave}>
             <h1>Ingresa a tu archivo<span className="maq lima">con tu cuenta</span></h1>
-            <div className="campo-f"><label htmlFor="correo">Correo</label><input id="correo" name="correo" className="inp" type="email" required defaultValue={modoDemo ? "ana.rojas@famenssalud.demo" : ""} autoComplete="username" /></div>
+            <div className="campo-f"><label htmlFor="correo">Correo</label><input id="correo" name="correo" className="inp" type="email" required defaultValue={modoDemo ? `ana.rojas@${cliente.dominio}` : ""} autoComplete="username" /></div>
             <div className="campo-f"><label htmlFor="clave">Contraseña</label><input id="clave" name="clave" className="inp" type="password" required defaultValue={modoDemo ? "demostracion" : ""} autoComplete="current-password" /></div>
             {error && <p className="error-form" role="alert">{error}</p>}
             <button className="btn btn-prim" type="submit" disabled={cargando}>{cargando ? "Verificando…" : "Continuar"}</button>
@@ -100,7 +111,7 @@ export default function Ingreso() {
             <button className="btn btn-sec" type="button" onClick={() => { setPaso("clave"); setError(""); }}><Icono n="volver" />Volver</button>
           </form>
         )}
-        <p className="ingreso-pie"><Icono n="candado" />Conexión cifrada. Cada ingreso queda en la auditoría.</p>
+        <p className="ingreso-pie"><Icono n="candado" />{demoPublica ? "Demo pública de Arriera · datos ficticios." : "Conexión cifrada. Cada ingreso queda en la auditoría."}</p>
       </div>
     </div>
   );

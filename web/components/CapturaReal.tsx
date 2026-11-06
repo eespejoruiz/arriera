@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { Cab } from "@/components/ui";
 import Icono from "@/components/Icono";
 import PanelMicroformas from "@/components/PanelMicroformas";
@@ -134,7 +135,7 @@ export default function CapturaReal() {
               {sel.microformas && <PanelMicroformas code={sel.code} />}
               {sel.ia && (
                 <div className="aviso" style={{ marginBottom: 12, fontSize: ".82rem" }}><Icono n="ia" /><span>{
-                  sel.ia.estado === "listo" ? <>La IA encontró <b>{sel.ia.documentos} documento{sel.ia.documentos === 1 ? "" : "s"}</b> en este lote. Lo dudoso está en <a href="/validacion/" className="lima">Validación</a>.</>
+                  sel.ia.estado === "listo" ? <>La IA encontró <b>{sel.ia.documentos} documento{sel.ia.documentos === 1 ? "" : "s"}</b> en este lote. Lo dudoso está en <Link href="/validacion/" className="lima">Validación</Link>.</>
                   : sel.ia.estado === "procesando" ? "La IA está separando, clasificando y leyendo los documentos…"
                   : sel.ia.estado === "pausado_presupuesto" ? "Procesamiento en pausa: se alcanzó el presupuesto mensual de IA."
                   : sel.ia.motivo ?? sel.ia.estado}</span></div>

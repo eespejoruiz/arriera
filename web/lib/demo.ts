@@ -1,6 +1,11 @@
 // DATOS DEMO · sintéticos. Nombres, DNI y documentos ficticios. Nunca datos reales.
 
-export const cliente = { nombre: "FAMENSSALUD", corto: "FS", detalle: "Licencia de uso · demostración" };
+// Demo pública (arriera.tech/demo/): sin login, con un cliente genérico y marca Arriera.
+export const demoPublica = process.env.NEXT_PUBLIC_DEMO_PUBLICA === "1";
+export const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
+export const cliente = demoPublica
+  ? { nombre: "Organización Demo", corto: "OD", detalle: "DATOS DEMO · todo es ficticio", dominio: "organizacion.demo" }
+  : { nombre: "FAMENSSALUD", corto: "FS", detalle: "Licencia de uso · demostración", dominio: "famenssalud.demo" };
 
 export const resumen = {
   capturadas: 48210, estimadas: 112000, hoy: 3912, ayer: 3480, autoAceptados: 91, pendientes: 214,
@@ -92,7 +97,7 @@ export const resultados = [
 export const auditoria = [
   { hora: "11:46:02", quien: "Carmen L.", rol: "Consulta", accion: "Vio la página", objeto: "Informe médico · Exp. 2018-0412 · pág. 6", ip: "10.20.1.14", hash: "9f3a…e21c" },
   { hora: "11:45:40", quien: "Asistente", rol: "IA", accion: "Respondió con 3 citas", objeto: "«subsidios 2018 sin boleta»", ip: "—", hash: "41b0…7d9a" },
-  { hora: "11:44:13", quien: "Odoo FAMENSSALUD", rol: "Integración", accion: "Consultó documentos", objeto: "res.partner/1842", ip: "10.20.1.40", hash: "c27e…0b55" },
+  { hora: "11:44:13", quien: `Odoo ${cliente.nombre}`, rol: "Integración", accion: "Consultó documentos", objeto: "res.partner/1842", ip: "10.20.1.40", hash: "c27e…0b55" },
   { hora: "11:41:58", quien: "Luis V.", rol: "Validador", accion: "Corrigió un campo", objeto: "Monto: S/ 1,280.00 → S/ 1,250.00", ip: "10.20.1.22", hash: "e8d1…a310" },
   { hora: "11:38:20", quien: "Estación Archivo 1", rol: "Captura", accion: "Subió archivo verificado", objeto: "L-2026-000187 · SHA-256 5c1e…", ip: "10.20.1.31", hash: "07aa…f4c2" },
   { hora: "11:30:05", quien: "Rosa M.", rol: "Operadora", accion: "Emparejó un celular", objeto: "Samsung Galaxy A54", ip: "10.20.1.57", hash: "b9e4…2210" },
@@ -109,9 +114,9 @@ export const depuracion = {
 };
 
 export const integraciones = [
-  { nombre: "Odoo FAMENSSALUD", sistema: "Odoo 17", estado: "on" as EstadoDisp, llamadas: "4,812 hoy", techo: "Contabilidad, Aportes y Préstamos hasta N2", ultima: "hace 1 min" },
+  { nombre: `Odoo ${cliente.nombre}`, sistema: "Odoo 17", estado: "on" as EstadoDisp, llamadas: "4,812 hoy", techo: "Contabilidad, Aportes y Préstamos hasta N2", ultima: "hace 1 min" },
   { nombre: "Starsoft Contabilidad", sistema: "Agente puente · SQL Server", estado: "warn" as EstadoDisp, llamadas: "Sincroniza cada 15 min", techo: "Contabilidad hasta N1", ultima: "hace 14 min" },
 ];
 export const webhooks = [
-  { url: "https://erp.famenssalud.demo/arriera/webhook", eventos: "documento.indexado, documento.validado, expediente.requisito_faltante", ok: "99.8%", ult: "200 · hace 1 min" },
+  { url: `https://erp.${cliente.dominio}/arriera/webhook`, eventos: "documento.indexado, documento.validado, expediente.requisito_faltante", ok: "99.8%", ult: "200 · hace 1 min" },
 ];
